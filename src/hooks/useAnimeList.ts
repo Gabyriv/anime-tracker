@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getUserList, addToList, updateStatus, removeFromList, saveDb } from '../lib/db';
+import { getUserList, addToList, updateStatus, removeFromList, saveDb, updateEpisodeProgress, updatePersonalRating, updatePersonalNotes } from '../lib/db';
 import { AnimeStatus, AnimeFromApi } from '../types/anime';
 
 interface UseAnimeListResult {
@@ -9,6 +9,9 @@ interface UseAnimeListResult {
   addToList: (anime: AnimeFromApi, status: AnimeStatus) => Promise<boolean>;
   updateStatus: (entryId: number, status: AnimeStatus) => Promise<void>;
   removeFromList: (entryId: number) => Promise<void>;
+  updateEpisodeProgress: (entryId: number, episodes: number) => Promise<void>;
+  updatePersonalRating: (entryId: number, rating: number | null) => Promise<void>;
+  updatePersonalNotes: (entryId: number, notes: string | null) => Promise<void>;
   refresh: () => void;
 }
 
@@ -70,5 +73,43 @@ export function useAnimeList(): UseAnimeListResult {
     }
   }
 
-  return { list, loading, error, addToList: add, updateStatus: update, removeFromList: remove, refresh };
+  async function updateEpisodes(entryId: number, episodes: number): Promise<void> {
+    try {
+      await updateEpisodeProgress(entryId, episodes);
+      refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update episodes');
+    }
+  }
+
+  async function updateRating(entryId: number, rating: number | null): Promise<void> {
+    try {
+      await updatePersonalRating(entryId, rating);
+      refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update rating');
+    }
+  }
+
+  async function updateNotes(entryId: number, notes: string | null): Promise<void> {
+    try {
+      await updatePersonalNotes(entryId, notes);
+      refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update notes');
+    }
+  }
+
+  return { 
+    list, 
+    loading, 
+    error, 
+    addToList: add, 
+    updateStatus: update, 
+    removeFromList: remove,
+    updateEpisodeProgress: updateEpisodes,
+    updatePersonalRating: updateRating,
+    updatePersonalNotes: updateNotes,
+    refresh 
+  };
 }

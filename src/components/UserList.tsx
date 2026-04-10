@@ -13,7 +13,7 @@ const STATUS_GROUPS: { status: AnimeStatus; label: string }[] = [
 ];
 
 export function UserList() {
-  const { list, loading, error, updateStatus, removeFromList, refresh } = useAnimeList();
+  const { list, loading, error, updateStatus, removeFromList, updateEpisodeProgress, updatePersonalRating, updatePersonalNotes, refresh } = useAnimeList();
   const [currentFilter, setCurrentFilter] = useState<AnimeStatus | 'all'>('all');
   
   // Calculate counts for each status
@@ -67,6 +67,18 @@ export function UserList() {
     refresh();
   };
   
+  const handleEpisodeChange = async (entryId: number, episodes: number) => {
+    await updateEpisodeProgress(entryId, episodes);
+  };
+  
+  const handleRatingChange = async (entryId: number, rating: number | null) => {
+    await updatePersonalRating(entryId, rating);
+  };
+  
+  const handleNotesChange = async (entryId: number, notes: string | null) => {
+    await updatePersonalNotes(entryId, notes);
+  };
+  
   if (loading) {
     return (
       <div className="p-4 text-center text-gray-400">
@@ -111,12 +123,15 @@ export function UserList() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {groupedList[group.status].map((entry: any) => (
-                  <UserListCard
-                    key={entry.id}
-                    entry={entry}
-                    onStatusChange={handleStatusChange}
-                    onRemove={handleRemove}
-                  />
+<UserListCard
+                      key={entry.id}
+                      entry={entry}
+                      onStatusChange={handleStatusChange}
+                      onRemove={handleRemove}
+                      onEpisodeChange={handleEpisodeChange}
+                      onRatingChange={handleRatingChange}
+                      onNotesChange={handleNotesChange}
+                    />
                 ))}
               </div>
             </div>
@@ -131,6 +146,9 @@ export function UserList() {
               entry={entry}
               onStatusChange={handleStatusChange}
               onRemove={handleRemove}
+              onEpisodeChange={handleEpisodeChange}
+              onRatingChange={handleRatingChange}
+              onNotesChange={handleNotesChange}
             />
           ))}
         </div>
