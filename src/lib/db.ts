@@ -156,6 +156,30 @@ export async function updateStatus(entryId: number, status: string): Promise<voi
   saveDb();
 }
 
+export async function updateEpisodeProgress(entryId: number, episodes: number): Promise<void> {
+  const database = await getDb();
+  database.run(`
+    UPDATE user_list SET episodes_watched = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+  `, [episodes, entryId]);
+  saveDb();
+}
+
+export async function updatePersonalRating(entryId: number, rating: number | null): Promise<void> {
+  const database = await getDb();
+  database.run(`
+    UPDATE user_list SET personal_rating = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+  `, [rating, entryId]);
+  saveDb();
+}
+
+export async function updatePersonalNotes(entryId: number, notes: string | null): Promise<void> {
+  const database = await getDb();
+  database.run(`
+    UPDATE user_list SET personal_notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+  `, [notes, entryId]);
+  saveDb();
+}
+
 export async function removeFromList(entryId: number): Promise<void> {
   const database = await getDb();
   database.run(`DELETE FROM user_list WHERE id = ?`, [entryId]);
