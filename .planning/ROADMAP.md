@@ -42,6 +42,20 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Setup & Database | 1/1 | ✓ Complete | 2026-04-09 |
 | 2. Search & List Management | 5/5 | ✓ Complete | 2026-04-09 |
+| 3. Enhanced Tracking | 3/3 | ✓ Complete | 2026-04-10 |
+
+### Phase 3: Enhanced Tracking
+
+**Goal:** Users can track episode progress, add personal ratings, and add personal notes
+**Requirements**: ENHT-01, ENHT-02, ENHT-03
+**Depends on:** Phase 2
+**Status:** ✓ Complete (2026-04-10)
+**Plans:** 3 plans (9 tasks)
+
+Plans:
+- [x] 03-01: Add database update functions for episode progress, rating, notes
+- [x] 03-02: Extend UserListCard with inline editing UI
+- [x] 03-03: Wire edit handlers from hook to UserList component
 
 ---
 
