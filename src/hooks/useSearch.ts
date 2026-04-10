@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { searchAnime } from '../lib/api';
+import { searchAnime, SearchError } from '../lib/api';
 import { AnimeFromApi } from '../types/anime';
 
 interface UseSearchResult {
@@ -40,10 +40,16 @@ export function useSearch(): UseSearchResult {
       setError(null);
       
       try {
-        const data = await searchAnime(currentQuery);
+        const { results: data, error: searchError } = await searchAnime(currentQuery);
         
         if (queryRef.current === currentQuery) {
-          setResults(data);
+          if (searchError) {
+            setError(searchError.message);
+            setResults([]);
+          } else {
+            setResults(data);
+            setError(null);
+          }
         }
       } catch (err) {
         if (err instanceof Error && err.name !== 'AbortError') {

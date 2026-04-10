@@ -4,39 +4,38 @@ import { useSearch } from './hooks/useSearch';
 import { useAnimeList } from './hooks/useAnimeList';
 import { SearchBar } from './components/SearchBar';
 import { SearchResults } from './components/SearchResults';
+import { UserList } from './components/UserList';
 import { StatusDropdown } from './components/StatusDropdown';
 import { AnimeFromApi, AnimeStatus } from './types/anime';
+
+type ViewMode = 'search' | 'list';
 
 function App() {
   const [dbReady, setDbReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedAnime, setSelectedAnime] = useState<AnimeFromApi | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('search');
   
   const { results, loading } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
 
-  // Check if database is ready
   useEffect(() => {
     initDb()
       .then(() => setDbReady(true))
       .catch((err) => setError(err.message));
   }, []);
 
-  // Check if anime is in user's list
   const isInList = (malId: number) => {
     return list.some(item => item.mal_id === malId);
   };
 
-  // Get user's status for anime
   const getUserStatus = (malId: number): AnimeStatus | null => {
     const entry = list.find(item => item.mal_id === malId);
     return entry?.status as AnimeStatus | null;
   };
 
-  // Handle status change
   const handleStatusChange = async (anime: AnimeFromApi, status: AnimeStatus) => {
     if (isInList(anime.mal_id)) {
-      // Find the entry and update status
       const entry = list.find(item => item.mal_id === anime.mal_id);
       if (entry) {
         await updateStatus(entry.id, status);
@@ -52,24 +51,57 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <header className="p-4">
-        <h1 className="text-3xl font-bold">Anime Tracker</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Anime Tracker</h1>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={() => setViewMode('search')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                viewMode === 'search' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Search
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                viewMode === 'list' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              My List ({list.length})
+            </button>
+          </div>
+        </div>
       </header>
       
       <main className="container mx-auto px-4">
-        <div className="mb-6">
-          <SearchBar />
-        </div>
+        {viewMode === 'search' && (
+          <>
+            <div className="mb-6">
+              <SearchBar />
+            </div>
+            
+            <SearchResults 
+              results={results} 
+              onAnimeSelect={setSelectedAnime}
+              onStatusChange={handleStatusChange}
+              isInList={isInList}
+              getUserStatus={getUserStatus}
+            />
+            
+            {loading && (
+              <div className="text-center py-4 text-gray-400">Loading...</div>
+            )}
+          </>
+        )}
         
-        <SearchResults 
-          results={results} 
-          onAnimeSelect={setSelectedAnime}
-          onStatusChange={handleStatusChange}
-          isInList={isInList}
-          getUserStatus={getUserStatus}
-        />
-        
-        {loading && (
-          <div className="text-center py-4 text-gray-400">Loading...</div>
+        {viewMode === 'list' && (
+          <UserList />
         )}
       </main>
       
@@ -109,7 +141,6 @@ function App() {
               </div>
             )}
             
-            {/* Add to list button in modal */}
             <div className="mt-4">
               <StatusDropdown 
                 currentStatus={getUserStatus(selectedAnime.mal_id)}

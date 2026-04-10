@@ -21,7 +21,15 @@ export function SearchBar() {
         )}
       </div>
       {error && (
-        <p className="mt-2 text-red-500 text-sm">{error}</p>
+        <div className="mt-2 p-3 bg-red-900/30 border border-red-800 rounded-lg">
+          <p className="text-red-400 text-sm">{error}</p>
+          <button
+            onClick={() => setQuery('')}
+            className="text-red-300 text-xs mt-1 hover:underline"
+          >
+            Clear search
+          </button>
+        </div>
       )}
     </div>
   );
