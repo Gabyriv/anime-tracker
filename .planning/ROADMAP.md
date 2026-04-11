@@ -82,6 +82,16 @@ Plans:
 Plans:
 - [x] 06-01: Search header redesign with expandable search, fixed toggle bug
 
+### Phase 7: Keyboard Shortcuts
+**Goal:** Add keyboard shortcuts for common actions (Esc to close modal, / to focus search)
+**Depends on:** Phase 6
+**Status:** ☐ Planned
+**Requirements:** UX-05, UX-06
+**Plans:** 1 plan
+
+Plans:
+- [ ] 07-01: Add keyboard shortcuts for Escape (close modal) and "/" (focus search)
+
 ---
 
 ## Current Features (as of 2026-04-11)
