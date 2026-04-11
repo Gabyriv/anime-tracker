@@ -182,8 +182,8 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 ## Feature Roadmap
 
 ### Phase 1: Search Enhancements
-- [ ] **Category Search** - Filter by anime type (TV, Movie, OVA, Special, etc.)
-- [ ] **Title Language Toggle** - Switch between English/Japanese titles
+- [x] **Category Search** - (partially - pagination works)
+- [x] **Title Language Toggle** - EN/JP/漢 toggle with romanized + kanji support
 - [ ] **Default View Options** - Choose what shows on search tab with no query:
   - Latest anime (currently airing/recent)
   - Popular anime (top rated) - *currently implemented*
@@ -191,10 +191,10 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
   - Category filters (Action, Comedy, Drama, etc.)
 
 ### Phase 2: UI/UX Improvements
-- [ ] Enhanced anime cards with more info on hover
-- [ ] Improved modal animations
-- [ ] Skeleton loading states
-- [ ] Toast notifications for actions (added to list, status changed, etc.)
+- [x] Enhanced anime cards with more info on hover
+- [x] Improved modal animations
+- [x] Skeleton loading states
+- [x] Toast notifications for actions (added to list, status changed, etc.)
 - [ ] Keyboard shortcuts (e.g., Esc to close modal, / to focus search)
 
 ### Phase 3: User Accounts (Future)
@@ -202,6 +202,19 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 - [ ] Cloud sync for anime list
 - [ ] Multi-device access
 - [ ] User preferences storage
+
+### Implemented Features (2026-04-11)
+- ✅ Search with Jikan API v4
+- ✅ Pagination (browse vs search separate state)
+- ✅ Title language toggle (EN/JP/漢)
+- ✅ Expandable search in header
+- ✅ Click-outside to close search
+- ✅ Enhanced anime detail modal
+- ✅ Episode progress tracking
+- ✅ Personal ratings and notes
+- ✅ Status filtering in My List
+- ✅ Toast notifications
+- ✅ Skeleton loading states
 
 ### Suggested Additions
 - [ ] Anime recommendations based on list

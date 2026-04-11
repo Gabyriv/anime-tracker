@@ -10,6 +10,7 @@ interface SearchHeaderProps {
 
 export function SearchHeader({ query, setQuery, loading, titleLanguage, onLanguageToggle }: SearchHeaderProps) {
   const [expanded, setExpanded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -18,8 +19,27 @@ export function SearchHeader({ query, setQuery, loading, titleLanguage, onLangua
     }
   }, [expanded]);
 
+  // Click outside to close
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        if (expanded && query.length === 0) {
+          setExpanded(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [expanded, query]);
+
   const handleToggle = () => {
     setExpanded(!expanded);
+  };
+
+  const handleClear = () => {
+    setQuery('');
+    inputRef.current?.focus();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -30,8 +50,21 @@ export function SearchHeader({ query, setQuery, loading, titleLanguage, onLangua
   };
 
   return (
-    <div className="relative flex items-center">
-      <div className={`relative flex items-center transition-all duration-300 ${expanded ? 'w-64' : 'w-10'}`}>
+    <div ref={containerRef} className="relative flex items-center gap-2">
+      {/* Language Toggle - outside search bar */}
+      <button
+        onClick={onLanguageToggle}
+        className="text-xs px-3 rounded-xl font-medium bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] transition-colors flex-shrink-0 h-10 flex items-center"
+      >
+        <span className={titleLanguage === 'english' ? 'text-[var(--color-accent)] font-bold' : 'text-[var(--color-foreground-muted)]'}>EN</span>
+        <span className="mx-0.5 text-[var(--color-foreground-muted)]">/</span>
+        <span className={titleLanguage === 'japanese' ? 'text-[var(--color-accent)] font-bold' : 'text-[var(--color-foreground-muted)]'}>JP</span>
+        <span className="mx-0.5 text-[var(--color-foreground-muted)]">/</span>
+        <span className={titleLanguage === 'kanji' ? 'text-[var(--color-accent)] font-bold' : 'text-[var(--color-foreground-muted)]'}>漢</span>
+      </button>
+
+      {/* Search Input */}
+      <div className={`relative flex items-center transition-all duration-300 ${expanded ? 'w-56' : 'w-10'}`}>
         {expanded ? (
           <div className="relative w-full">
             <input
@@ -41,39 +74,17 @@ export function SearchHeader({ query, setQuery, loading, titleLanguage, onLangua
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full bg-[var(--color-surface)] text-[var(--color-foreground)] border border-[var(--color-border)] rounded-xl px-4 py-2 pr-24
+              className="w-full bg-[var(--color-surface)] text-[var(--color-foreground)] border border-[var(--color-border)] rounded-xl px-4 py-2 pr-10 h-10
                          placeholder-[var(--color-foreground-muted)] focus:outline-none focus:border-[var(--color-accent)] transition-all duration-200 text-sm"
             />
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-              <button
-                onClick={onLanguageToggle}
-                className="text-xs px-2 py-1 rounded font-medium bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] transition-colors"
-              >
-                <span className={titleLanguage === 'english' ? 'text-[var(--color-accent)] font-bold' : 'text-[var(--color-foreground-muted)]'}>EN</span>
-                <span className="mx-0.5 text-[var(--color-foreground-muted)]">/</span>
-                <span className={titleLanguage === 'japanese' ? 'text-[var(--color-accent)] font-bold' : 'text-[var(--color-foreground-muted)]'}>JP</span>
-                <span className="mx-0.5 text-[var(--color-foreground-muted)]">/</span>
-                <span className={titleLanguage === 'kanji' ? 'text-[var(--color-accent)] font-bold' : 'text-[var(--color-foreground-muted)]'}>漢</span>
-              </button>
-              {query.length > 0 && !loading && (
-                <button
-                  onClick={() => setQuery('')}
-                  className="text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] p-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-              <button
-                onClick={handleToggle}
-                className="text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] p-1"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+            <button
+              onClick={handleClear}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] p-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         ) : (
           <button

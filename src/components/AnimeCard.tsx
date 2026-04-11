@@ -11,12 +11,12 @@ interface AnimeCardProps {
 export function AnimeCard({ anime, onSelect, action, titleLanguage = 'english' }: AnimeCardProps) {
   const imageUrl = anime.images?.jpg?.large_image_url;
   
-  // titleLanguage: 'english' = default, 'japanese' = romanized, 'kanji' = literal Japanese
-  let title = anime.title || 'Unknown Title';
-  if (titleLanguage === 'japanese' && anime.title_english) {
-    title = anime.title_english;
-  } else if (titleLanguage === 'kanji' && anime.title_japanese) {
-    title = anime.title_japanese;
+  // titleLanguage: 'english' = title_english → title (English), 'japanese' = title → title_english (romanized), 'kanji' = title_japanese
+  let title = anime.title_english || anime.title || 'Unknown Title';
+  if (titleLanguage === 'japanese') {
+    title = anime.title || anime.title_english || 'Unknown Title';
+  } else if (titleLanguage === 'kanji') {
+    title = anime.title_japanese || anime.title_english || anime.title || 'Unknown Title';
   }
   const year = anime.year;
   const episodes = anime.episodes;

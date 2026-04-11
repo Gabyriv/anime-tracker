@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
-status: Post-Phase Enhancements (UI/UX)
-stopped_at: Completed 04-02-PLAN.md - UI/UX improvements
-last_updated: "2026-04-11T20:26:00.000Z"
-last_activity: 2026-04-10
+milestone_name: Core Features Complete
+status: Search Header & Title Language Complete
+last_updated: "2026-04-11T21:00:00.000Z"
+last_activity: 2026-04-11
 progress:
-  total_phases: 4
-  completed_phases: 2
-  total_plans: 11
-  completed_plans: 6
-  percent: 55
+  total_phases: 6
+  completed_phases: 6
+  total_plans: 15
+  completed_plans: 15
+  percent: 100
 ---
 
 # Project State
@@ -21,85 +20,86 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09)
 
 **Core value:** A fast, local-first anime tracker where users can quickly search for anime and manage their watch status with minimal friction.
-**Current focus:** UI/UX refinements and anime detail modal improvements
 
 ## Current Position
 
-Phase: 03 (Complete)
+Phase: 06 (Complete)
 Plan: Complete
-Status: Post-Phase Enhancements (UI/UX)
-Last activity: 2026-04-10
+Status: Core Features Complete - Ready for next enhancements
+Last activity: 2026-04-11
 
-Progress: [████████████] 100% (Phases 1-3)
+Progress: [████████████████] 100% (Phases 1-6)
 
-## Post-Phase Work (Not in Roadmap)
+## What Was Built
 
-### Completed This Session:
+### Search Tab
+- Jikan API v4 integration for anime search
+- Pagination with separate state for browse vs search
+- Title language toggle (EN/JP/Kanji)
+- Expandable search bar in header with click-outside-to-close
 
-- UI/UX redesign with Cinema Dark theme (using frontend-design + ui-ux-pro-max skills)
-- CSS variables, glassmorphism cards, purple accent (#5e6ad2)
-- Poppins font throughout
-- Fixed title clipping in anime cards
-- Fixed search bar (loads top anime when cleared)
+### My List Tab
+- Full CRUD for anime list management
+- Status categories: watching, completed, plan_to_watch, on_hold, dropped
+- Episode progress tracking
+- Personal ratings (1-10)
+- Personal notes
+- Filter by status
 
-### Phase 4 Planned
+### Anime Detail Modal
+- Two-column responsive layout
+- User data display (status, progress, rating)
+- Synopsis with expand/collapse (Show more/less)
+- Add to list directly from modal
 
-- UI/UX Improvements: Enhanced modal, skeleton loading, toast notifications
-- Plans: 04-01 (modal), 04-02 (loading + toasts)
-
-### Known Issues/Next Steps:
-
-- Execute Phase 4
+### UI/UX
+- Cinema Dark theme (deep black #0a0a0f → #020203, purple accent #5e6ad2)
+- Glassmorphism cards with borders
+- Poppins font
+- Skeleton loading states
+- Toast notifications for actions
+- Header: [Title (clickable)] → [EN/JP/漢] → [🔍] → [Home] [My List]
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9 (across 3 phases)
-- Average duration: ~10 min/plan
+- Total plans completed: 15 (across 6 phases)
+- Average duration: ~5 min/plan
 
-**By Phase:**
+| Phase | Plans | Status |
+|-------|-------|--------|
+| 01 | 3 | ✓ Complete |
+| 02 | 5 | ✓ Complete |
+| 03 | 3 | ✓ Complete |
+| 04 | 2 | ✓ Complete |
+| 05 | 1 | ✓ Complete |
+| 06 | 1 | ✓ Complete |
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-----|----------|
-| 01 | 1 | ~10 min | ~10 min |
-| 02 | 5 | ~60 min | ~12 min |
-| 03 | 3 | ~8 min | ~3 min |
-| Phase 04-ui-ux-improvements P01 | 3 | 2 tasks | 2 files |
-
-## Accumulated Context
-
-### Decisions
-
-Recent decisions:
-
-- Theme: Cinema Dark (deep black #020203, purple accent #5e6ad2, glassmorphism)
-- Added shadcn-style UI components (Dialog, Dropdown)
-- Using sql.js with wasmBinary for SQLite
-- Search shows top anime by default when query is empty
-
-### Tech Stack (Current)
+## Tech Stack (Current)
 
 - React 19.x + Vite 8.x
 - TailwindCSS 4.x with custom theme variables
-- sql.js (client-side SQLite)
+- sql.js (client-side SQLite with localStorage persistence)
 - Jikan API v4 for anime data
 - No backend (local-first)
 
-### Pending Features
+## Next Features (from FEATURES.md)
 
-- Anime detail modal improvements (next discussion)
-- (Other features TBD based on user feedback)
+### Search Enhancements (Future)
+- Category Search - Filter by anime type (TV, Movie, OVA, Special, etc.)
+- Default View Options - Choose what shows on search tab with no query
 
-### Blockers/Concerns
+### User Accounts (Future)
+- Authentication via Clerk or WorkOS
+- Cloud sync for anime list
 
-- None
-
-## Session Continuity
-
-Last session: 2026-04-11T20:21:02.161Z
-Stopped at: Completed 04-01-PLAN.md - enhanced anime modal
-Resume context: User wants to improve the anime detail modal (the one with synopsis, rating, etc.)
+### Suggested Additions
+- Anime recommendations based on list
+- Watch history tracking with timestamps
+- Import/export list (JSON format)
+- Dark/light theme toggle
 
 ---
-*Updated after UI/UX session - 2026-04-10*
+
+*Updated: 2026-04-11 - Core features complete, ready for enhancements*

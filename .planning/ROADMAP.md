@@ -8,8 +8,9 @@
 - [x] **Phase 1: Setup & Database** - Project scaffolding, Tauri + React, SQLite schema
 - [x] **Phase 2: Search & List Management** - Full anime search and list CRUD
 - [x] **Phase 3: Enhanced Tracking** - Episode progress, ratings, notes
-- [ ] **Phase 4: UI/UX Improvements** - Enhanced anime cards, improved modal, skeletons, toasts
-- [ ] **Phase 5: Title Language Toggle** - Switch between English/Japanese titles
+- [x] **Phase 4: UI/UX Improvements** - Enhanced modal, skeletons, toasts, pagination
+- [x] **Phase 5: Title Language Toggle** - EN/JP/Kanji toggle with romanized titles
+- [x] **Phase 6: Search Header Redesign** - Expandable search in header, clickable title, Home tab
 
 ## Phase Details
 
@@ -56,37 +57,83 @@ Plans:
 **Goal:** Enhanced anime detail modal, skeleton loading states, toast notifications
 **Requirements**: UX-01, UX-02, UX-03, UX-04
 **Depends on:** Phase 3
-**Status:** Ready to execute (2 plans)
+**Status:** ✓ Complete (2026-04-11)
+**Plans:** 2 plans (13 tasks)
 
 Plans:
-- [x] 04-01: Enhanced anime detail modal
-- [x] 04-02: UI/UX enhancements (scroll, toasts, badges, X button)
+- [x] 04-01: Enhanced anime detail modal with two-column layout, user data display
+- [x] 04-02: Loading states + toast notifications (skeletons, toasts, pagination)
 
 ### Phase 5: Title Language Toggle
-**Goal:** Toggle between English and Japanese titles in search results and detail modal
-**Requirements**: (to be added)
+**Goal:** Toggle between English, Japanese (romanized), and Kanji titles
 **Depends on:** Phase 4
-**Status:** Ready to execute (1 plan)
+**Status:** ✓ Complete (2026-04-11)
+**Plans:** 1 plan (4 tasks)
 
 Plans:
-- [ ] 05-01: Title Language Toggle feature implementation
+- [x] 05-01: Add EN/JP/漢 toggle with proper title display logic
+
+### Phase 6: Search Header Redesign
+**Goal:** Move search to header, clickable title, Home tab rename
+**Depends on:** Phase 5
+**Status:** ✓ Complete (2026-04-11)
+**Plans:** 1 plan (4 tasks)
+
+Plans:
+- [x] 06-01: Search header redesign with expandable search, fixed toggle bug
 
 ---
 
-## Post-Phase Work (2026-04-10)
+## Current Features (as of 2026-04-11)
 
-### UI/UX Refinements (Completed)
+### Search Tab
+- Search anime via Jikan API v4
+- Pagination (20 per page) for top anime and search results
+- Separate page state for browse vs search modes
+- Title language toggle (EN/JP/Kanji)
+- Expandable search bar in header with click-outside-to-close
 
-- Applied Cinema Dark theme using frontend-design + ui-ux-pro-max skills
-- Added CSS variables with custom theme (deep black, purple accent)
-- Implemented glassmorphism cards with borders and hover effects
-- Added Poppins font, smooth animations, press feedback
-- Fixed title clipping, search bar, moved + button to title area
+### My List Tab
+- View all added anime with status categories
+- Filter by status (watching, completed, plan to watch, on hold, dropped)
+- Episode progress tracking
+- Personal ratings (1-10 stars)
+- Personal notes
+- Remove from list
 
-### Next Discussion Needed
+### Anime Detail Modal
+- Enhanced two-column layout (image + details)
+- Shows user data if anime is in list (status, progress, rating)
+- Synopsis with expand/collapse (Show more/less)
+- Add to list directly from modal
 
-- Anime Detail Modal improvements (pending)
+### UI/UX
+- Cinema Dark theme (deep black, purple accent)
+- Glassmorphism cards
+- Poppins font
+- Skeleton loading states
+- Toast notifications for actions
+- Responsive design
 
 ---
 
-*Roadmap updated: 2026-04-10*
+## Next Features (from FEATURES.md)
+
+### Phase 1: Search Enhancements (Future)
+- [ ] Category Search - Filter by anime type (TV, Movie, OVA, Special, etc.)
+- [ ] Default View Options - Choose what shows on search tab with no query (Latest, Popular, Seasonal)
+
+### Phase 2: User Accounts (Future)
+- [ ] Authentication via Clerk or WorkOS
+- [ ] Cloud sync for anime list
+
+### Suggested Additions
+- [ ] Anime recommendations based on list
+- [ ] Watch history tracking with timestamps
+- [ ] Import/export list (JSON format)
+- [ ] Dark/light theme toggle (currently dark only)
+- [ ] Continue watching section
+
+---
+
+*Roadmap updated: 2026-04-11*

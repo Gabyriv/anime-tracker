@@ -66,12 +66,12 @@ function App() {
   };
 
   const getModalTitle = (anime: AnimeFromApi) => {
-    if (titleLanguage === 'japanese' && anime.title_english) {
-      return anime.title_english;
-    } else if (titleLanguage === 'kanji' && anime.title_japanese) {
-      return anime.title_japanese;
+    if (titleLanguage === 'japanese') {
+      return anime.title || anime.title_english;
+    } else if (titleLanguage === 'kanji') {
+      return anime.title_japanese || anime.title_english || anime.title;
     }
-    return anime.title;
+    return anime.title_english || anime.title;
   };
 
   if (error) return <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-deep)] text-red-400">Database Error: {error}</div>;
@@ -100,7 +100,7 @@ function App() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setViewMode('search')}
-                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${
+                  className={`h-10 px-5 rounded-xl font-medium transition-all duration-200 flex items-center ${
                     viewMode === 'search' 
                       ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]' 
                       : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
@@ -110,7 +110,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${
+                  className={`h-10 px-5 rounded-xl font-medium transition-all duration-200 flex items-center ${
                     viewMode === 'list' 
                       ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]' 
                       : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
