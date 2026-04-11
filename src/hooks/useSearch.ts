@@ -12,6 +12,7 @@ interface UseSearchResult {
   setPage: React.Dispatch<React.SetStateAction<number>>;
   pagination: PaginationInfo;
   loadTopAnime: (pageNum?: number) => Promise<void>;
+  isBrowseMode: boolean;
 }
 
 export function useSearch(): UseSearchResult {
@@ -19,13 +20,21 @@ export function useSearch(): UseSearchResult {
   const [results, setResults] = useState<AnimeFromApi[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  const [browsePage, setBrowsePage] = useState(1);
+  const [searchPage, setSearchPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationInfo>({
     current_page: 1,
     last_visible_page: 1,
     has_next_page: false,
     has_prev_page: false,
   });
+  
+  // Determine if we're in browse mode (empty query) or search mode
+  const isBrowseMode = query.trim() === '';
+  
+  // Use the appropriate page based on mode
+  const page = isBrowseMode ? browsePage : searchPage;
+  const setPage = isBrowseMode ? setBrowsePage : setSearchPage;
   
   const abortControllerRef = useRef<AbortController | null>(null);
   const queryRef = useRef(query);
@@ -34,7 +43,7 @@ export function useSearch(): UseSearchResult {
   pageRef.current = page;
   
   const loadTopAnime = useCallback(async (pageNum?: number) => {
-    const targetPage = pageNum ?? pageRef.current;
+    const targetPage = pageNum ?? browsePage;
     setLoading(true);
     setError(null);
     try {
@@ -44,14 +53,14 @@ export function useSearch(): UseSearchResult {
       } else {
         setResults(data);
         setPagination(pag);
-        setPage(targetPage);
+        setBrowsePage(targetPage);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [browsePage]);
   
   useEffect(() => {
     loadTopAnime(1);
@@ -60,10 +69,9 @@ export function useSearch(): UseSearchResult {
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
       const currentQuery = queryRef.current;
-      const currentPage = pageRef.current;
       
       if (!currentQuery.trim()) {
-        await loadTopAnime(currentPage);
+        await loadTopAnime(browsePage);
         return;
       }
       
@@ -76,15 +84,16 @@ export function useSearch(): UseSearchResult {
       setError(null);
       
       try {
-        const { results: data, pagination: pag, error: searchError } = await searchAnime(currentQuery, currentPage);
+        const { results: data, pagination: pag, error: searchError } = await searchAnime(currentQuery, searchPage);
         
-        if (queryRef.current === currentQuery && pageRef.current === currentPage) {
+        if (queryRef.current === currentQuery) {
           if (searchError) {
             setError(searchError.message);
             setResults([]);
           } else {
             setResults(data);
             setPagination(pag);
+            setSearchPage(searchPage);
             setError(null);
           }
         }
@@ -93,14 +102,14 @@ export function useSearch(): UseSearchResult {
           setError(err.message);
         }
       } finally {
-        if (queryRef.current === currentQuery && pageRef.current === currentPage) {
+        if (queryRef.current === currentQuery) {
           setLoading(false);
         }
       }
     }, 500);
     
     return () => clearTimeout(timeoutId);
-  }, [query, page, loadTopAnime]);
-  
-  return { query, setQuery, results, loading, error, page, setPage, pagination, loadTopAnime };
+  }, [query, browsePage, searchPage, loadTopAnime]);
+
+  return { query, setQuery, results, loading, error, page, setPage, pagination, loadTopAnime, isBrowseMode };
 }
