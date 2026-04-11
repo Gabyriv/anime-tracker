@@ -3,6 +3,8 @@ export type AnimeStatus = 'watching' | 'completed' | 'plan_to_watch' | 'on_hold'
 export interface AnimeFromApi {
   mal_id: number;
   title: string;
+  title_english: string | null;
+  title_japanese: string | null;
   images: {
     jpg: {
       image_url: string;
