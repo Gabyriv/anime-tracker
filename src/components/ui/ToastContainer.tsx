@@ -1,5 +1,5 @@
 import { useToast } from '../../context/ToastContext';
-import { StatusType } from '../../context/ToastContext';
+type StatusType = 'watching' | 'completed' | 'plan_to_watch' | 'on_hold' | 'dropped';
 
 const STATUS_COLORS: Record<StatusType, string> = {
   watching: 'bg-[#3b82f6]',

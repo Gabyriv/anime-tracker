@@ -1,1 +1,1 @@
-export { useToast, ToastProvider, toast, setToastFunction } from '../context/ToastContext';
+export { useToast, ToastProvider, toast } from '../context/ToastContext';
