@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { initDb } from './lib/db';
 import { useSearch } from './hooks/useSearch';
 import { useAnimeList } from './hooks/useAnimeList';
@@ -8,7 +8,7 @@ import { UserList } from './components/UserList';
 import { StatusDropdown } from './components/StatusDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './components/ui/Dialog';
 import { ToastContainer } from './components/ui/ToastContainer';
-import { ToastProvider, setToastFunction, toast, useToast } from './context/ToastContext';
+import { ToastProvider, toast } from './context/ToastContext';
 import { AnimeFromApi, AnimeStatus } from './types/anime';
 
 type ViewMode = 'search' | 'list';
@@ -18,22 +18,17 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [selectedAnime, setSelectedAnime] = useState<AnimeFromApi | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('search');
+  const [synopsisExpanded, setSynopsisExpanded] = useState(false);
+  const toastFnRef = useRef<((msg: string, type?: string) => void) | null>(null);
   
   const { query, setQuery, results, loading, error: searchError, page, setPage, pagination } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
-  const [addToast, setAddToast] = useState<((msg: string, type?: any) => void) | null>(null);
 
   useEffect(() => {
     initDb()
       .then(() => setDbReady(true))
       .catch((err) => setError(err.message));
   }, []);
-
-  useEffect(() => {
-    if (addToast) {
-      setToastFunction(addToast);
-    }
-  }, [addToast]);
 
   const isInList = (malId: number) => {
     return list.some(item => item.mal_id === malId);
@@ -49,11 +44,11 @@ function App() {
       const entry = list.find(item => item.mal_id === anime.mal_id);
       if (entry) {
         await updateStatus(entry.id, status);
-        toast(`Status updated to ${status.replace('_', ' ')}`);
+        if (toastFnRef.current) toastFnRef.current(`Status updated to ${status.replace('_', ' ')}`);
       }
     } else {
       await addToList(anime, status);
-      toast(`Added to ${status.replace('_', ' ')} list`);
+      if (toastFnRef.current) toastFnRef.current(`Added to ${status.replace('_', ' ')} list`);
     }
   };
 
@@ -61,8 +56,7 @@ function App() {
   if (!dbReady) return <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-deep)] text-[var(--color-foreground)]">Initializing database...</div>;
 
   return (
-    <ToastProvider setToastFunction={setAddToast}>
-      <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#020203] text-[var(--color-foreground)]">
+    <ToastProvider toastFnRef={toastFnRef}>
       <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#020203] text-[var(--color-foreground)]">
         <header className="p-6 border-b border-[var(--color-border)]">
           <div className="flex items-center justify-between">
@@ -131,7 +125,7 @@ function App() {
         )}
       </main>
       
-      <Dialog open={!!selectedAnime} onOpenChange={(open) => !open && setSelectedAnime(null)}>
+      <Dialog open={!!selectedAnime} onOpenChange={(open) => { if (!open) setSelectedAnime(null); setSynopsisExpanded(false); }}>
         <DialogContent className="relative flex flex-col lg:flex-row gap-6">
           {selectedAnime && (
             <>
@@ -151,10 +145,10 @@ function App() {
                 <DialogHeader>
                   <DialogTitle className="text-2xl">{selectedAnime.title}</DialogTitle>
                   <DialogDescription className="flex flex-wrap gap-3 mt-2">
-                    {selectedAnime.year && <span>Year: {selectedAnime.year}</span>}
-                    {selectedAnime.episodes && <span>{selectedAnime.episodes} episodes</span>}
-                    {selectedAnime.status && <span>{selectedAnime.status}</span>}
-                    {selectedAnime.score && <span className="text-amber-400">★ {selectedAnime.score}</span>}
+                    {selectedAnime.year && <span className="bg-[var(--color-surface)] px-2 py-1 rounded text-xs">Year: {selectedAnime.year}</span>}
+                    {selectedAnime.episodes && <span className="bg-[var(--color-surface)] px-2 py-1 rounded text-xs">{selectedAnime.episodes} episodes</span>}
+                    {selectedAnime.status && <span className="bg-[var(--color-surface)] px-2 py-1 rounded text-xs capitalize">{selectedAnime.status?.replace('_', ' ')}</span>}
+                    {selectedAnime.score && <span className="bg-[var(--color-surface)] px-2 py-1 rounded text-xs text-amber-400">★ {selectedAnime.score}</span>}
                   </DialogDescription>
                 </DialogHeader>
                 
@@ -189,11 +183,19 @@ function App() {
                 {/* Synopsis */}
                 {selectedAnime.synopsis && (
                   <div className="mt-4">
-                    <p className="text-[var(--color-foreground-muted)] text-sm leading-relaxed">
-                      {selectedAnime.synopsis.length > 300 
+                    <p className="text-[var(--color-foreground-muted)] text-sm leading-relaxed whitespace-pre-wrap">
+                      {selectedAnime.synopsis.length > 300 && !synopsisExpanded
                         ? selectedAnime.synopsis.slice(0, 300) + '...'
                         : selectedAnime.synopsis}
                     </p>
+                    {selectedAnime.synopsis.length > 300 && (
+                      <button
+                        onClick={() => setSynopsisExpanded(!synopsisExpanded)}
+                        className="text-[var(--color-accent)] text-sm mt-2 hover:underline"
+                      >
+                        {synopsisExpanded ? <span className="font-bold">−</span> : <span className="font-bold">+</span>} {synopsisExpanded ? 'Show less' : 'Show more'}
+                      </button>
+                    )}
                   </div>
                 )}
                 
