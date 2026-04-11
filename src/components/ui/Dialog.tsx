@@ -76,4 +76,12 @@ const DialogDescription = React.forwardRef<
 ))
 DialogDescription.displayName = "DialogDescription"
 
-export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription }
+const DialogBody = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={`flex-1 overflow-y-auto ${className}`} {...props} />
+))
+DialogBody.displayName = "DialogBody"
+
+export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogBody }

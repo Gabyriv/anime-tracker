@@ -119,38 +119,80 @@ function App() {
       </main>
       
       <Dialog open={!!selectedAnime} onOpenChange={(open) => !open && setSelectedAnime(null)}>
-        <DialogContent className="relative">
+        <DialogContent className="relative flex flex-col lg:flex-row gap-6">
           {selectedAnime && (
             <>
+              {/* Image section */}
               {selectedAnime.images?.jpg?.large_image_url && (
-                <div className="relative mb-6 w-full">
+                <div className="lg:w-1/3 flex-shrink-0">
                   <img 
                     src={selectedAnime.images.jpg.large_image_url}
                     alt={selectedAnime.title}
-                    className="w-full max-h-[60vh] object-contain rounded-xl"
+                    className="w-full rounded-xl object-cover"
                   />
                 </div>
               )}
-              <DialogHeader>
-                <DialogTitle>{selectedAnime.title}</DialogTitle>
-                <DialogDescription>
-                  {selectedAnime.year && `Year: ${selectedAnime.year} • `}
-                  {selectedAnime.episodes && `${selectedAnime.episodes} episodes • `}
-                  {selectedAnime.score && `★ ${selectedAnime.score}`}
-                </DialogDescription>
-              </DialogHeader>
               
-              {selectedAnime.synopsis && (
-                <div className="mb-4">
-                  <p className="text-[var(--color-foreground-muted)] text-sm leading-relaxed">{selectedAnime.synopsis}</p>
+              {/* Details section */}
+              <div className="flex-1 flex flex-col">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl">{selectedAnime.title}</DialogTitle>
+                  <DialogDescription className="flex flex-wrap gap-3 mt-2">
+                    {selectedAnime.year && <span>Year: {selectedAnime.year}</span>}
+                    {selectedAnime.episodes && <span>{selectedAnime.episodes} episodes</span>}
+                    {selectedAnime.status && <span>{selectedAnime.status}</span>}
+                    {selectedAnime.score && <span className="text-amber-400">★ {selectedAnime.score}</span>}
+                  </DialogDescription>
+                </DialogHeader>
+                
+                {/* User data if in list */}
+                {(() => {
+                  const entry = list.find(item => item.mal_id === selectedAnime.mal_id);
+                  if (entry) {
+                    return (
+                      <div className="flex gap-4 mt-3 py-3 border-y border-[var(--color-border)]">
+                        <div>
+                          <span className="text-xs text-[var(--color-foreground-muted)]">Status</span>
+                          <p className="text-sm font-medium">{entry.status}</p>
+                        </div>
+                        {entry.episodes_watched > 0 && (
+                          <div>
+                            <span className="text-xs text-[var(--color-foreground-muted)]">Progress</span>
+                            <p className="text-sm font-medium">{entry.episodes_watched}/{selectedAnime.episodes || '?'}</p>
+                          </div>
+                        )}
+                        {entry.personal_rating && (
+                          <div>
+                            <span className="text-xs text-[var(--color-foreground-muted)]">Your Rating</span>
+                            <p className="text-sm font-medium text-amber-400">★ {entry.personal_rating}</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                
+                {/* Synopsis */}
+                {selectedAnime.synopsis && (
+                  <div className="mt-4">
+                    <p className="text-[var(--color-foreground-muted)] text-sm leading-relaxed">
+                      {selectedAnime.synopsis.length > 300 
+                        ? selectedAnime.synopsis.slice(0, 300) + '...'
+                        : selectedAnime.synopsis}
+                    </p>
+                  </div>
+                )}
+                
+                {/* Action buttons */}
+                <div className="mt-auto pt-4">
+                  <StatusDropdown 
+                    currentStatus={getUserStatus(selectedAnime.mal_id)}
+                    onStatusChange={(status) => handleStatusChange(selectedAnime, status)}
+                    isInList={isInList(selectedAnime.mal_id)}
+                  />
                 </div>
-              )}
-              
-              <StatusDropdown 
-                currentStatus={getUserStatus(selectedAnime.mal_id)}
-                onStatusChange={(status) => handleStatusChange(selectedAnime, status)}
-                isInList={isInList(selectedAnime.mal_id)}
-              />
+              </div>
             </>
           )}
         </DialogContent>
