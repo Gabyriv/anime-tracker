@@ -17,15 +17,15 @@ const FILTERS: { value: AnimeStatus | 'all'; label: string }[] = [
 
 export function StatusFilter({ currentFilter, onFilterChange, counts }: StatusFilterProps) {
   return (
-    <div className="flex flex-wrap gap-2 mb-4">
+    <div className="flex flex-wrap gap-2 mb-6">
       {FILTERS.map(filter => (
         <button
           key={filter.value}
           onClick={() => onFilterChange(filter.value)}
-          className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
             currentFilter === filter.value
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]'
+              : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)] border border-[var(--color-border)]'
           }`}
         >
           {filter.label}

@@ -9,8 +9,8 @@ A minimal anime list tracking application that allows users to search for anime 
 
 ### Constraints
 
-- **Database**: SQLite — simple, local, sufficient for single-user
-- **Tech**: TBD during research phase
+- **Database**: SQLite — simple, local, sufficient for single-user (sql.js client-side)
+- **Tech**: React 19 + Vite 8 + TailwindCSS 4 (web app, not Tauri yet)
 - **Scope**: Keep it minimal — focus on core list management
 <!-- GSD:project-end -->
 
@@ -78,13 +78,76 @@ A minimal anime list tracking application that allows users to search for anime 
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
-Conventions not yet established. Will populate as patterns emerge during development.
+### Code Style
+- Use TypeScript with React functional components
+- TailwindCSS 4.x with @theme for custom variables
+- Components in `src/components/`, hooks in `src/hooks/`, lib utilities in `src/lib/`
+- shadcn-style UI components in `src/components/ui/`
+
+### Theme (Cinema Dark)
+- Background: `#0a0a0f` → `#020203` gradient
+- Accent: `#5e6ad2` (purple) with glow effects
+- Cards: glassmorphism with `rgba(255,255,255,0.05)` bg, `rgba(255,255,255,0.08)` border
+- Font: Poppins (Google Fonts)
+- Animations: 150-300ms duration, scale on press (0.97)
+
+### Database
+- sql.js with wasmBinary for client-side SQLite
+- localStorage persistence via `saveDb()` function
+
+### API
+- Jikan API v4 for anime search (https://api.jikan.moe/v4)
+
+### Status Colors
+- Watching: `#3b82f6` (blue)
+- Completed: `#22c55e` (green)
+- Plan to Watch: `#eab308` (yellow)
+- On Hold: `#f97316` (orange)
+- Dropped: `#ef4444` (red)
 <!-- GSD:conventions-end -->
 
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->
 ## Architecture
 
-Architecture not yet mapped. Follow existing patterns found in the codebase.
+### Current Structure
+```
+src/
+├── components/
+│   ├── ui/           # shadcn-style components (Dialog, Dropdown)
+│   ├── AnimeCard.tsx
+│   ├── SearchBar.tsx
+│   ├── SearchResults.tsx
+│   ├── UserList.tsx
+│   ├── UserListCard.tsx
+│   ├── StatusFilter.tsx
+│   ├── StatusDropdown.tsx
+│   └── Pagination.tsx
+├── hooks/
+│   ├── useAnimeList.ts
+│   └── useSearch.ts
+├── lib/
+│   ├── api.ts        # Jikan API integration
+│   └── db.ts        # SQLite with sql.js
+└── types/
+    └── anime.ts
+```
+
+### Data Flow
+1. Search: useSearch hook → Jikan API → SearchResults → AnimeCard
+2. List: useAnimeList hook → SQLite → UserList → UserListCard
+3. Add to list: StatusDropdown → addToList → SQLite
+4. Pagination: Pagination component ↔ useSearch → API → Results
+
+### Current Features Implemented
+- Search anime via Jikan API v4
+- View top/popular anime on initial load
+- Pagination (20 per page, page numbers + prev/next)
+- Add anime to list with status (watching, completed, plan_to_watch, on_hold, dropped)
+- Episode progress tracking
+- Remove from list
+- Filter list by status
+- View anime details in modal
+- Rate limiting (350ms between API requests)
 <!-- GSD:architecture-end -->
 
 <!-- GSD:skills-start source:skills/ -->
@@ -114,3 +177,39 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 > Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
 > This section is managed by `generate-claude-profile` -- do not edit manually.
 <!-- GSD:profile-end -->
+
+<!-- GSD:features-start source:FEATURES.md -->
+## Feature Roadmap
+
+### Phase 1: Search Enhancements
+- [ ] **Category Search** - Filter by anime type (TV, Movie, OVA, Special, etc.)
+- [ ] **Title Language Toggle** - Switch between English/Japanese titles
+- [ ] **Default View Options** - Choose what shows on search tab with no query:
+  - Latest anime (currently airing/recent)
+  - Popular anime (top rated) - *currently implemented*
+  - Seasonal anime
+  - Category filters (Action, Comedy, Drama, etc.)
+
+### Phase 2: UI/UX Improvements
+- [ ] Enhanced anime cards with more info on hover
+- [ ] Improved modal animations
+- [ ] Skeleton loading states
+- [ ] Toast notifications for actions (added to list, status changed, etc.)
+- [ ] Keyboard shortcuts (e.g., Esc to close modal, / to focus search)
+
+### Phase 3: User Accounts (Future)
+- [ ] Authentication via Clerk or WorkOS
+- [ ] Cloud sync for anime list
+- [ ] Multi-device access
+- [ ] User preferences storage
+
+### Suggested Additions
+- [ ] Anime recommendations based on list
+- [ ] Watch history tracking with timestamps
+- [ ] Notes/review for each anime in list
+- [ ] Import/export list (JSON format)
+- [ ] Sharing animated list progress to social media
+- [ ] Dark/light theme toggle (currently dark only)
+- [ ] Continue watching section
+- [ ] Season/sequel detection and linking
+<!-- GSD:features-end -->

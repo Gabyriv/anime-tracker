@@ -10,9 +10,12 @@ export async function getDb(): Promise<Database> {
 }
 
 export async function initDb(): Promise<Database> {
+  const wasmResponse = await fetch('/sql-wasm.wasm');
+  const wasmBinary = await wasmResponse.arrayBuffer();
+  
   const SQL = await initSqlJs({
-    locateFile: (file: string) => `https://sql.js.org/dist/${file}`
-  });
+    wasmBinary
+  } as any);
   
   const savedDb = localStorage.getItem(DB_KEY);
   if (savedDb) {

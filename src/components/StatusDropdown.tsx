@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { AnimeStatus } from '../types/anime';
 
 interface StatusDropdownProps {
@@ -8,15 +8,26 @@ interface StatusDropdownProps {
 }
 
 const STATUS_OPTIONS: { value: AnimeStatus; label: string; color: string }[] = [
-  { value: 'watching', label: 'Watching', color: 'bg-blue-500' },
-  { value: 'completed', label: 'Completed', color: 'bg-green-500' },
-  { value: 'plan_to_watch', label: 'Plan to Watch', color: 'bg-yellow-500' },
-  { value: 'on_hold', label: 'On Hold', color: 'bg-orange-500' },
-  { value: 'dropped', label: 'Dropped', color: 'bg-red-500' }
+  { value: 'watching', label: 'Watching', color: 'bg-[var(--color-status-watching)]' },
+  { value: 'completed', label: 'Completed', color: 'bg-[var(--color-status-completed)]' },
+  { value: 'plan_to_watch', label: 'Plan to Watch', color: 'bg-[var(--color-status-plan)]' },
+  { value: 'on_hold', label: 'On Hold', color: 'bg-[var(--color-status-onhold)]' },
+  { value: 'dropped', label: 'Dropped', color: 'bg-[var(--color-status-dropped)]' }
 ];
 
 export function StatusDropdown({ currentStatus, onStatusChange, isInList }: StatusDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const currentOption = STATUS_OPTIONS.find(opt => opt.value === currentStatus);
 
@@ -25,41 +36,38 @@ export function StatusDropdown({ currentStatus, onStatusChange, isInList }: Stat
     setIsOpen(false);
   };
 
-  if (isInList && currentOption) {
-    return (
-      <div className="relative">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={`${currentOption.color} text-white text-xs px-2 py-1 rounded-full flex items-center gap-1`}
-        >
-          {currentOption.label}
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        {isOpen && (
-          <div className="absolute top-full mt-1 right-0 bg-gray-800 rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
-            {STATUS_OPTIONS.map(option => (
-              <button
-                key={option.value}
-                onClick={() => handleSelect(option.value)}
-                className={`block w-full text-left px-3 py-2 text-sm hover:bg-gray-700 ${option.value === currentStatus ? 'bg-gray-700' : ''}`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <button
-      onClick={() => setIsOpen(!isOpen)}
-      className="bg-gray-700 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded-full"
-    >
-      + Add to list
-    </button>
+    <div ref={dropdownRef} className="relative inline-block">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        className={`${
+          currentOption?.color || 'bg-[var(--color-surface)]'
+        } text-white text-sm px-4 py-2 rounded-xl w-40 justify-between flex items-center gap-2 transition-all duration-200 hover:opacity-90`}
+      >
+        {currentOption?.label || (isInList ? 'In List' : '+ Add')}
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {isOpen && (
+        <div className="absolute bottom-full mb-2 right-0 bg-[var(--color-bg-elevated)] rounded-xl shadow-xl py-1 z-[100] min-w-[160px] border border-[var(--color-border)]">
+          {STATUS_OPTIONS.map(option => (
+            <button
+              key={option.value}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSelect(option.value);
+              }}
+              className={`block w-full text-left px-4 py-2.5 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)] transition-colors ${option.value === currentStatus ? 'bg-[var(--color-surface)]' : ''}`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

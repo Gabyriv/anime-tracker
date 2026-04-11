@@ -6,6 +6,7 @@ import { SearchBar } from './components/SearchBar';
 import { SearchResults } from './components/SearchResults';
 import { UserList } from './components/UserList';
 import { StatusDropdown } from './components/StatusDropdown';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './components/ui/Dialog';
 import { AnimeFromApi, AnimeStatus } from './types/anime';
 
 type ViewMode = 'search' | 'list';
@@ -16,7 +17,7 @@ function App() {
   const [selectedAnime, setSelectedAnime] = useState<AnimeFromApi | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('search');
   
-  const { results, loading } = useSearch();
+  const { query, setQuery, results, loading, error: searchError, page, setPage, pagination } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
 
   useEffect(() => {
@@ -45,32 +46,34 @@ function App() {
     }
   };
 
-  if (error) return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-red-500">Database Error: {error}</div>;
-  if (!dbReady) return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Initializing database...</div>;
+  if (error) return <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-deep)] text-red-400">Database Error: {error}</div>;
+  if (!dbReady) return <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-deep)] text-[var(--color-foreground)]">Initializing database...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <header className="p-4">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#020203] text-[var(--color-foreground)]">
+      <header className="p-6 border-b border-[var(--color-border)]">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Anime Tracker</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            <span className="text-[var(--color-accent)]">Anime</span> Tracker
+          </h1>
           
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
               onClick={() => setViewMode('search')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${
                 viewMode === 'search' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]' 
+                  : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
               }`}
             >
               Search
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${
                 viewMode === 'list' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]' 
+                  : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
               }`}
             >
               My List ({list.length})
@@ -79,15 +82,25 @@ function App() {
         </div>
       </header>
       
-      <main className="container mx-auto px-4">
+      <main className="container mx-auto px-4 py-6">
         {viewMode === 'search' && (
           <>
-            <div className="mb-6">
-              <SearchBar />
+            <div className="mb-8">
+              <SearchBar 
+                query={query}
+                setQuery={setQuery}
+                loading={loading}
+                error={searchError}
+              />
             </div>
             
             <SearchResults 
-              results={results} 
+              query={query}
+              results={results}
+              loading={loading}
+              error={searchError}
+              pagination={pagination}
+              onPageChange={setPage}
               onAnimeSelect={setSelectedAnime}
               onStatusChange={handleStatusChange}
               isInList={isInList}
@@ -95,7 +108,7 @@ function App() {
             />
             
             {loading && (
-              <div className="text-center py-4 text-gray-400">Loading...</div>
+              <div className="text-center py-8 text-[var(--color-foreground-muted)]">Loading...</div>
             )}
           </>
         )}
@@ -105,59 +118,43 @@ function App() {
         )}
       </main>
       
-      {selectedAnime && (
-        <div 
-          className="fixed inset-0 bg-black/70 flex items-center justify-center p-4"
-          onClick={() => setSelectedAnime(null)}
-        >
-          <div 
-            className="bg-gray-800 rounded-lg p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {selectedAnime.images?.jpg?.image_url && (
-              <img 
-                src={selectedAnime.images.jpg.image_url}
-                alt={selectedAnime.title}
-                className="w-full h-64 object-cover rounded-lg mb-4"
-              />
-            )}
-            <h2 className="text-2xl font-bold mb-2">{selectedAnime.title}</h2>
-            {selectedAnime.year && (
-              <p className="text-gray-400 mb-2">Year: {selectedAnime.year}</p>
-            )}
-            {selectedAnime.episodes && (
-              <p className="text-gray-400 mb-2">Episodes: {selectedAnime.episodes}</p>
-            )}
-            {selectedAnime.score && (
-              <p className="text-gray-400 mb-2">Score: {selectedAnime.score}</p>
-            )}
-            {selectedAnime.status && (
-              <p className="text-gray-400 mb-4">Status: {selectedAnime.status}</p>
-            )}
-            {selectedAnime.synopsis && (
-              <div className="mb-4">
-                <h3 className="font-semibold mb-1">Synopsis</h3>
-                <p className="text-gray-300 text-sm">{selectedAnime.synopsis}</p>
-              </div>
-            )}
-            
-            <div className="mt-4">
+      <Dialog open={!!selectedAnime} onOpenChange={(open) => !open && setSelectedAnime(null)}>
+        <DialogContent className="relative">
+          {selectedAnime && (
+            <>
+              {selectedAnime.images?.jpg?.large_image_url && (
+                <div className="relative mb-6 w-full">
+                  <img 
+                    src={selectedAnime.images.jpg.large_image_url}
+                    alt={selectedAnime.title}
+                    className="w-full max-h-[60vh] object-contain rounded-xl"
+                  />
+                </div>
+              )}
+              <DialogHeader>
+                <DialogTitle>{selectedAnime.title}</DialogTitle>
+                <DialogDescription>
+                  {selectedAnime.year && `Year: ${selectedAnime.year} • `}
+                  {selectedAnime.episodes && `${selectedAnime.episodes} episodes • `}
+                  {selectedAnime.score && `★ ${selectedAnime.score}`}
+                </DialogDescription>
+              </DialogHeader>
+              
+              {selectedAnime.synopsis && (
+                <div className="mb-4">
+                  <p className="text-[var(--color-foreground-muted)] text-sm leading-relaxed">{selectedAnime.synopsis}</p>
+                </div>
+              )}
+              
               <StatusDropdown 
                 currentStatus={getUserStatus(selectedAnime.mal_id)}
                 onStatusChange={(status) => handleStatusChange(selectedAnime, status)}
                 isInList={isInList(selectedAnime.mal_id)}
               />
-            </div>
-            
-            <button
-              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full"
-              onClick={() => setSelectedAnime(null)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

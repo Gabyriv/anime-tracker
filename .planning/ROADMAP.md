@@ -7,6 +7,7 @@
 
 - [x] **Phase 1: Setup & Database** - Project scaffolding, Tauri + React, SQLite schema
 - [x] **Phase 2: Search & List Management** - Full anime search and list CRUD
+- [x] **Phase 3: Enhanced Tracking** - Episode progress, ratings, notes
 
 ## Phase Details
 
@@ -36,14 +37,6 @@ Plans:
 - [x] 02-04: Build user list view with filtering and grouping
 - [x] 02-05: Add error handling and empty states
 
-## Progress
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Setup & Database | 1/1 | ✓ Complete | 2026-04-09 |
-| 2. Search & List Management | 5/5 | ✓ Complete | 2026-04-09 |
-| 3. Enhanced Tracking | 3/3 | ✓ Complete | 2026-04-10 |
-
 ### Phase 3: Enhanced Tracking
 
 **Goal:** Users can track episode progress, add personal ratings, and add personal notes
@@ -59,4 +52,20 @@ Plans:
 
 ---
 
-*Roadmap updated: 2026-04-09*
+## Post-Phase Work (2026-04-10)
+
+### UI/UX Refinements (Completed)
+
+- Applied Cinema Dark theme using frontend-design + ui-ux-pro-max skills
+- Added CSS variables with custom theme (deep black, purple accent)
+- Implemented glassmorphism cards with borders and hover effects
+- Added Poppins font, smooth animations, press feedback
+- Fixed title clipping, search bar, moved + button to title area
+
+### Next Discussion Needed
+
+- Anime Detail Modal improvements (pending)
+
+---
+
+*Roadmap updated: 2026-04-10*

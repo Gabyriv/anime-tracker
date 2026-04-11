@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { AnimeStatus, UserAnimeEntry } from '../types/anime';
-import { StatusDropdown } from './StatusDropdown';
 
 interface UserListCardProps {
   entry: UserAnimeEntry & {
@@ -13,33 +12,21 @@ interface UserListCardProps {
   onStatusChange: (entryId: number, status: AnimeStatus) => void;
   onRemove: (entryId: number) => void;
   onEpisodeChange: (entryId: number, episodes: number) => void;
-  onRatingChange: (entryId: number, rating: number | null) => void;
-  onNotesChange: (entryId: number, notes: string | null) => void;
 }
 
-const STATUS_COLORS: Record<AnimeStatus, string> = {
-  watching: 'bg-blue-500',
-  completed: 'bg-green-500',
-  plan_to_watch: 'bg-yellow-500',
-  on_hold: 'bg-orange-500',
-  dropped: 'bg-red-500'
-};
-
-const STATUS_LABELS: Record<AnimeStatus, string> = {
-  watching: 'Watching',
-  completed: 'Completed',
-  plan_to_watch: 'Plan to Watch',
-  on_hold: 'On Hold',
-  dropped: 'Dropped'
-};
+const STATUS_OPTIONS: { value: AnimeStatus; label: string; color: string }[] = [
+  { value: 'watching', label: 'Watching', color: 'bg-[var(--color-status-watching)]' },
+  { value: 'completed', label: 'Completed', color: 'bg-[var(--color-status-completed)]' },
+  { value: 'plan_to_watch', label: 'Plan to Watch', color: 'bg-[var(--color-status-plan)]' },
+  { value: 'on_hold', label: 'On Hold', color: 'bg-[var(--color-status-onhold)]' },
+  { value: 'dropped', label: 'Dropped', color: 'bg-[var(--color-status-dropped)]' }
+];
 
 export function UserListCard({ 
   entry, 
   onStatusChange, 
   onRemove,
-  onEpisodeChange,
-  onRatingChange,
-  onNotesChange
+  onEpisodeChange
 }: UserListCardProps) {
   const imageUrl = entry.image_url;
   const title = entry.title || 'Unknown Title';
@@ -47,145 +34,95 @@ export function UserListCard({
   const totalEpisodes = entry.episodes;
   const episodesWatched = entry.episodes_watched || 0;
   
-  // Star rating display and handling
-  const [showRatingPicker, setShowRatingPicker] = useState(false);
-  const currentRating = entry.personal_rating;
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
-  // Notes handling
-  const [notesExpanded, setNotesExpanded] = useState(false);
-  const [notesValue, setNotesValue] = useState(entry.personal_notes || '');
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowStatusDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   
-  const handleRatingClick = () => {
-    if (currentRating) {
-      // Cycle: clear rating if clicked
-      onRatingChange(entry.id, null);
-    } else {
-      setShowRatingPicker(true);
-    }
+  const currentStatusOption = STATUS_OPTIONS.find(opt => opt.value === entry.status);
+  
+  const handleStatusChange = (status: AnimeStatus) => {
+    onStatusChange(entry.id, status);
+    setShowStatusDropdown(false);
   };
   
-  const handleRatingSelect = (rating: number) => {
-    onRatingChange(entry.id, rating);
-    setShowRatingPicker(false);
-  };
-  
-  const handleNotesBlur = () => {
-    setNotesExpanded(false);
-    if (notesValue !== entry.personal_notes) {
-      onNotesChange(entry.id, notesValue || null);
-    }
-  };
-  
-  // Format episode display
   const episodeDisplay = totalEpisodes 
     ? `${episodesWatched} / ${totalEpisodes} eps`
     : `Ep ${episodesWatched}`;
   
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg flex flex-row">
+    <div className="glass-card flex flex-row overflow-visible">
       {imageUrl ? (
         <img 
           src={imageUrl} 
           alt={title}
-          className="w-24 h-36 object-cover flex-shrink-0"
+          className="w-24 h-36 object-cover flex-shrink-0 rounded-l-2xl"
         />
       ) : (
-        <div className="w-24 h-36 bg-gray-700 flex items-center justify-center flex-shrink-0">
-          <span className="text-gray-400 text-xs">No Image</span>
+        <div className="w-24 h-36 bg-[var(--color-bg-elevated)] flex items-center justify-center flex-shrink-0 rounded-l-2xl">
+          <span className="text-[var(--color-foreground-muted)] text-xs">No Image</span>
         </div>
       )}
       
-      <div className="p-3 flex flex-col justify-between flex-grow">
+      <div className="p-4 flex flex-col justify-between flex-grow overflow-visible">
         <div>
-          <h3 className="text-white font-medium line-clamp-2">{title}</h3>
-          {year && <p className="text-gray-400 text-sm">{year}</p>}
+          <h3 className="text-[var(--color-foreground)] font-medium line-clamp-2">{title}</h3>
+          {year && <p className="text-[var(--color-foreground-muted)] text-sm mt-1">{year}</p>}
           
-          {/* Episode Progress */}
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-gray-400 text-xs">{episodeDisplay}</span>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-[var(--color-foreground-muted)] text-xs">{episodeDisplay}</span>
             <input
               type="number"
               min="0"
               value={episodesWatched}
               onChange={(e) => onEpisodeChange(entry.id, parseInt(e.target.value) || 0)}
-              className="w-12 bg-gray-700 text-gray-300 text-xs px-1 py-0.5 rounded"
+              className="w-12 bg-[var(--color-surface)] text-[var(--color-foreground)] text-xs px-2 py-1 rounded-lg border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none"
             />
           </div>
-          
-          {/* Star Rating */}
-          <div className="flex items-center gap-1 mt-1 relative">
-            {currentRating ? (
-              <button
-                onClick={handleRatingClick}
-                className="text-yellow-400 text-sm hover:text-yellow-300"
-              >
-                {'★'.repeat(currentRating)}
-                <span className="text-gray-500">{'☆'.repeat(10 - currentRating)}</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleRatingClick}
-                className="text-gray-500 text-sm hover:text-yellow-400"
-              >
-                ☆☆☆☆☆☆☆☆☆
-              </button>
-            )}
-            {showRatingPicker && (
-              <div className="absolute top-6 left-0 bg-gray-700 p-2 rounded shadow-lg z-10 flex flex-wrap gap-1">
-                {[1,2,3,4,5,6,7,8,9,10].map(n => (
+        </div>
+        
+        <div className="flex items-center gap-2 mt-3 overflow-visible">
+          <div ref={dropdownRef} className="relative overflow-visible">
+            <button
+              onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+              className={`${currentStatusOption?.color || 'bg-[var(--color-surface)]'} text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all duration-200 hover:opacity-90`}
+            >
+              {currentStatusOption?.label || 'Unknown'}
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showStatusDropdown && (
+              <div className="absolute bottom-full mb-2 left-0 bg-[var(--color-bg-elevated)] rounded-xl shadow-xl py-1 z-[100] min-w-[140px] border border-[var(--color-border)]">
+                {STATUS_OPTIONS.map(option => (
                   <button
-                    key={n}
-                    onClick={() => handleRatingSelect(n)}
-                    className={`w-6 h-6 rounded-full text-xs ${n <= (currentRating || 0) ? 'text-yellow-400' : 'text-gray-500'} hover:text-yellow-300`}
+                    key={option.value}
+                    onClick={() => handleStatusChange(option.value)}
+                    className={`block w-full text-left px-4 py-2.5 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface)] transition-colors ${option.value === entry.status ? 'bg-[var(--color-surface)]' : ''}`}
                   >
-                    {n}
+                    {option.label}
                   </button>
                 ))}
               </div>
             )}
           </div>
           
-          {/* Notes */}
-          <div className="mt-1">
-            {notesExpanded ? (
-              <textarea
-                value={notesValue}
-                onChange={(e) => setNotesValue(e.target.value)}
-                onBlur={handleNotesBlur}
-                placeholder="Add notes..."
-                className="w-full bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded resize-none h-20"
-                autoFocus
-              />
-            ) : (
-              <button
-                onClick={() => setNotesExpanded(true)}
-                className="text-gray-500 text-xs hover:text-gray-400 truncate block w-full text-left"
-              >
-                {entry.personal_notes || '+ Add note...'}
-              </button>
-            )}
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2 mt-2">
-          <span className={`${STATUS_COLORS[entry.status]} text-white text-xs px-2 py-0.5 rounded-full`}>
-            {STATUS_LABELS[entry.status]}
-          </span>
-          
-          <button
-            onClick={() => onStatusChange(entry.id, entry.status)}
-            className="text-gray-400 hover:text-white text-xs"
-            title="Change status"
-          >
-            ↻
-          </button>
-          
           <button
             onClick={() => onRemove(entry.id)}
-            className="text-gray-400 hover:text-red-400 text-xs ml-auto"
+            className="text-[var(--color-foreground-muted)] hover:text-red-400 text-xs ml-auto p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
             title="Remove from list"
           >
-            ✕
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
       </div>

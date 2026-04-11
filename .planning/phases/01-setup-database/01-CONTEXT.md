@@ -17,9 +17,9 @@ Project scaffolding complete with working SQLite database. Phase 1 delivers:
 ## Implementation Decisions
 
 ### Project Initialization
-- **D-01:** Use Tauri 2.x + React (TypeScript) — 10MB app size, 30-40MB memory, fastest setup
-- **D-02:** Use @tauri-apps/plugin-sql for SQLite integration
-- **D-03:** Use Drizzle ORM for type-safe database queries
+- **D-01:** Use web-only approach (Vite + React) — no desktop framework due to missing system dependencies (libgtk-3-dev, libwebkit2gtk-4.1-dev)
+- **D-02:** Use sql.js for in-browser SQLite (replaces @tauri-apps/plugin-sql)
+- **D-03:** Use plain SQL queries (no Drizzle ORM - simpler for sql.js)
 - **D-04:** Use pnpm as package manager
 - **D-05:** Use Vite for build tooling
 
@@ -65,10 +65,10 @@ Project scaffolding complete with working SQLite database. Phase 1 delivers:
 
 ### Established Patterns
 - New project — no existing patterns yet
-- Research recommends: Tauri + React + SQLite + Drizzle
+- Research recommends: Vite + React + sql.js (web-only)
 
 ### Integration Points
-- Frontend: React components → Tauri commands → SQLite
+- Frontend: React components → sql.js (browser SQLite via localStorage for persistence)
 - External: Jikan API for anime search (Phase 2)
 
 </code_context>
