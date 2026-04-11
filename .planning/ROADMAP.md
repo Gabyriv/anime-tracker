@@ -8,6 +8,7 @@
 - [x] **Phase 1: Setup & Database** - Project scaffolding, Tauri + React, SQLite schema
 - [x] **Phase 2: Search & List Management** - Full anime search and list CRUD
 - [x] **Phase 3: Enhanced Tracking** - Episode progress, ratings, notes
+- [ ] **Phase 4: UI/UX Improvements** - Enhanced anime cards, improved modal, skeletons, toasts
 
 ## Phase Details
 
@@ -49,6 +50,16 @@ Plans:
 - [x] 03-01: Add database update functions for episode progress, rating, notes
 - [x] 03-02: Extend UserListCard with inline editing UI
 - [x] 03-03: Wire edit handlers from hook to UserList component
+
+### Phase 4: UI/UX Improvements
+**Goal:** Enhanced anime detail modal, skeleton loading states, toast notifications
+**Requirements**: UX-01, UX-02, UX-03, UX-04
+**Depends on:** Phase 3
+**Status:** Ready to execute (2 plans)
+
+Plans:
+- [x] 04-01: Enhanced anime detail modal
+- [ ] 04-02: Loading states & toast notifications
 
 ---
 
