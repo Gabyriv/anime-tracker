@@ -40,9 +40,9 @@ export function AnimeCard({ anime, onSelect, action }: AnimeCardProps) {
           {action}
         </div>
         <div className="flex items-center gap-3 text-[var(--color-foreground-muted)] text-xs mt-2">
-          {year && <span>{year}</span>}
-          {episodes && <span>{episodes} eps</span>}
-          {score && <span className="text-[#fbbf24]">★ {score.toFixed(1)}</span>}
+          {year && <span className="px-2 py-0.5">{year}</span>}
+          {episodes && <span className="px-2 py-0.5">{episodes} eps</span>}
+          {score && <span className="px-2 py-0.5 text-[#fbbf24]">★ {score.toFixed(1)}</span>}
         </div>
       </div>
     </div>
