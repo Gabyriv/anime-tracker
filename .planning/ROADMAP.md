@@ -9,6 +9,7 @@
 - [x] **Phase 2: Search & List Management** - Full anime search and list CRUD
 - [x] **Phase 3: Enhanced Tracking** - Episode progress, ratings, notes
 - [ ] **Phase 4: UI/UX Improvements** - Enhanced anime cards, improved modal, skeletons, toasts
+- [ ] **Phase 5: Title Language Toggle** - Switch between English/Japanese titles
 
 ## Phase Details
 
@@ -59,7 +60,16 @@ Plans:
 
 Plans:
 - [x] 04-01: Enhanced anime detail modal
-- [ ] 04-02: Loading states & toast notifications
+- [x] 04-02: UI/UX enhancements (scroll, toasts, badges, X button)
+
+### Phase 5: Title Language Toggle
+**Goal:** Toggle between English and Japanese titles in search results and detail modal
+**Requirements**: (to be added)
+**Depends on:** Phase 4
+**Status:** Ready to execute (1 plan)
+
+Plans:
+- [ ] 05-01: Title Language Toggle feature implementation
 
 ---
 

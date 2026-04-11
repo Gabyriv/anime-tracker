@@ -3,7 +3,7 @@ import { initDb } from './lib/db';
 import { useSearch } from './hooks/useSearch';
 import { useAnimeList } from './hooks/useAnimeList';
 import { useTitleLanguageToggle } from './hooks/useTitleLanguageToggle';
-import { SearchBar } from './components/SearchBar';
+import { SearchHeader } from './components/SearchHeader';
 import { SearchResults } from './components/SearchResults';
 import { UserList } from './components/UserList';
 import { StatusDropdown } from './components/StatusDropdown';
@@ -79,49 +79,50 @@ function App() {
       <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#020203] text-[var(--color-foreground)]">
         <header className="p-6 border-b border-[var(--color-border)]">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 
+              className="text-3xl font-bold tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => setViewMode('search')}
+            >
               <span className="text-[var(--color-accent)]">Anime</span> Tracker
             </h1>
           
-          <div className="flex gap-3">
-            <button
-              onClick={() => setViewMode('search')}
-              className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${
-                viewMode === 'search' 
-                  ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]' 
-                  : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
-              }`}
-            >
-              Search
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${
-                viewMode === 'list' 
-                  ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]' 
-                  : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
-              }`}
-            >
-              My List ({list.length})
-            </button>
+            <div className="flex items-center gap-4">
+              <SearchHeader 
+                query={query}
+                setQuery={setQuery}
+                loading={loading}
+                isJapanese={isJapanese}
+                onLanguageToggle={toggleTitleLanguage}
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setViewMode('search')}
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${
+                    viewMode === 'search' 
+                      ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]' 
+                      : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
+                  }`}
+                >
+                  Home
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${
+                    viewMode === 'list' 
+                      ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]' 
+                      : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
+                  }`}
+                >
+                  My List ({list.length})
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
       
       <main className="container mx-auto px-4 py-6">
         {viewMode === 'search' && (
           <>
-            <div className="mb-8">
-              <SearchBar 
-                query={query}
-                setQuery={setQuery}
-                loading={loading}
-                error={searchError}
-                titleLanguage={isJapanese ? 'japanese' : 'english'}
-                onTitleLanguageToggle={toggleTitleLanguage}
-              />
-            </div>
-            
             <SearchResults 
               query={query}
               results={results}
