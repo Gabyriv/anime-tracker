@@ -1,4 +1,13 @@
 import { useToast } from '../../context/ToastContext';
+import { StatusType } from '../../context/ToastContext';
+
+const STATUS_COLORS: Record<StatusType, string> = {
+  watching: 'bg-[#3b82f6]',
+  completed: 'bg-[#22c55e]',
+  plan_to_watch: 'bg-[#eab308]',
+  on_hold: 'bg-[#f97316]',
+  dropped: 'bg-[#ef4444]',
+};
 
 export function ToastContainer() {
   const { toasts } = useToast();
@@ -16,7 +25,7 @@ export function ToastContainer() {
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={`px-4 py-3 rounded-lg shadow-lg animate-in slide-in-from-right duration-200 ${typeStyles[t.type]}`}
+          className={`px-4 py-3 rounded-lg shadow-lg animate-in slide-in-from-right duration-200 ${t.status ? STATUS_COLORS[t.status] : typeStyles[t.type]}`}
         >
           {t.message}
         </div>

@@ -1,17 +1,27 @@
-import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
 
 type ToastType = 'success' | 'error' | 'info';
+type StatusType = 'watching' | 'completed' | 'plan_to_watch' | 'on_hold' | 'dropped';
 
 interface Toast {
   id: number;
   message: string;
   type: ToastType;
+  status?: StatusType;
 }
 
 interface ToastContextType {
   toasts: Toast[];
-  addToast: (message: string, type?: ToastType) => void;
+  addToast: (message: string, type?: ToastType, status?: StatusType) => void;
 }
+
+const STATUS_COLORS: Record<StatusType, string> = {
+  watching: 'bg-[#3b82f6]',
+  completed: 'bg-[#22c55e]',
+  plan_to_watch: 'bg-[#eab308]',
+  on_hold: 'bg-[#f97316]',
+  dropped: 'bg-[#ef4444]',
+};
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
@@ -25,25 +35,26 @@ export function useToast() {
 
 interface ToastProviderProps {
   children: ReactNode;
-  setToastFunction: React.Dispatch<React.SetStateAction<((message: string, type?: ToastType) => void) | null>>;
+  toastFnRef?: React.MutableRefObject<((message: string, type?: ToastType, status?: StatusType) => void) | null>;
 }
 
-export function ToastProvider({ children, setToastFunction }: ToastProviderProps) {
+export function ToastProvider({ children, toastFnRef }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = useCallback((message: string, type: ToastType = 'success') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
+  const addToast = (message: string, type: ToastType = 'success', status?: StatusType) => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, message, type, status }]);
     
-    // Auto remove after 3 seconds
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 3000);
-  }, []);
+  };
 
   useEffect(() => {
-    setToastFunction(addToast);
-  }, [addToast, setToastFunction]);
+    if (toastFnRef) {
+      toastFnRef.current = addToast;
+    }
+  }, [toastFnRef]);
 
   return (
     <ToastContext.Provider value={{ toasts, addToast }}>
@@ -52,15 +63,6 @@ export function ToastProvider({ children, setToastFunction }: ToastProviderProps
   );
 }
 
-// Export simple toast function that can be used anywhere
-let toastFn: ((message: string, type?: ToastType) => void) | null = null;
-
-export function setToastFunction(fn: (message: string, type?: ToastType) => void) {
-  toastFn = fn;
-}
-
 export function toast(message: string, type: ToastType = 'success') {
-  if (toastFn) {
-    toastFn(message, type);
-  }
+  console.warn('toast called outside ToastProvider');
 }
