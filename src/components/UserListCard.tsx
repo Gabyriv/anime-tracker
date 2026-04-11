@@ -64,10 +64,10 @@ export function UserListCard({
         <img 
           src={imageUrl} 
           alt={title}
-          className="w-24 h-36 object-cover flex-shrink-0 rounded-l-2xl"
+          className="w-auto h-full min-h-[144px] max-w-[96px] object-cover flex-shrink-0 rounded-l-2xl"
         />
       ) : (
-        <div className="w-24 h-36 bg-[var(--color-bg-elevated)] flex items-center justify-center flex-shrink-0 rounded-l-2xl">
+        <div className="w-24 h-full min-h-[144px] bg-[var(--color-bg-elevated)] flex items-center justify-center flex-shrink-0 rounded-l-2xl">
           <span className="text-[var(--color-foreground-muted)] text-xs">No Image</span>
         </div>
       )}
