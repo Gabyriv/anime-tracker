@@ -19,10 +19,21 @@ function App() {
   const [selectedAnime, setSelectedAnime] = useState<AnimeFromApi | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('search');
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
-  const toastFnRef = useRef<((msg: string, type?: string) => void) | null>(null);
+  const toastFnRef = useRef<((msg: string, type?: string, status?: string) => void) | null>(null);
   
   const { query, setQuery, results, loading, error: searchError, page, setPage, pagination } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
+
+  // Status labels for toast formatting
+  const statusLabels: Record<string, string> = {
+    watching: 'Watching',
+    completed: 'Completed',
+    plan_to_watch: 'Plan to Watch',
+    on_hold: 'On Hold',
+    dropped: 'Dropped',
+  };
+
+  const formatStatusLabel = (status: string): string => statusLabels[status] || status.replace(/_/g, ' ');
 
   useEffect(() => {
     initDb()
@@ -44,11 +55,11 @@ function App() {
       const entry = list.find(item => item.mal_id === anime.mal_id);
       if (entry) {
         await updateStatus(entry.id, status);
-        if (toastFnRef.current) toastFnRef.current(`Status updated to ${status.replace('_', ' ')}`);
+        if (toastFnRef.current) toastFnRef.current(`Status Updated to ${formatStatusLabel(status)}`, 'success', status);
       }
     } else {
       await addToList(anime, status);
-      if (toastFnRef.current) toastFnRef.current(`Added to ${status.replace('_', ' ')} list`);
+      if (toastFnRef.current) toastFnRef.current(`Added to ${formatStatusLabel(status)} list`, 'success', status);
     }
   };
 
