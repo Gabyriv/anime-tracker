@@ -24,9 +24,10 @@ interface SearchResultsProps {
   onStatusChange?: (anime: AnimeFromApi, status: AnimeStatus) => void;
   isInList?: (malId: number) => boolean;
   getUserStatus?: (malId: number) => AnimeStatus | null;
+  titleLanguage?: 'english' | 'japanese';
 }
 
-export function SearchResults({ query, results, loading, error, pagination, onPageChange, onAnimeSelect, onStatusChange, isInList, getUserStatus }: SearchResultsProps) {
+export function SearchResults({ query, results, loading, error, pagination, onPageChange, onAnimeSelect, onStatusChange, isInList, getUserStatus, titleLanguage = 'english' }: SearchResultsProps) {
   const handleStatusChange = (anime: AnimeFromApi, status: AnimeStatus) => {
     onStatusChange?.(anime, status);
   };
@@ -82,6 +83,7 @@ export function SearchResults({ query, results, loading, error, pagination, onPa
               key={anime.mal_id}
               anime={anime} 
               onSelect={onAnimeSelect}
+              titleLanguage={titleLanguage}
               action={
                 onStatusChange && (
                   <Dropdown

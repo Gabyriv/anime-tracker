@@ -5,11 +5,14 @@ interface AnimeCardProps {
   anime: AnimeFromApi;
   onSelect?: (anime: AnimeFromApi) => void;
   action?: ReactNode;
+  titleLanguage?: 'english' | 'japanese';
 }
 
-export function AnimeCard({ anime, onSelect, action }: AnimeCardProps) {
+export function AnimeCard({ anime, onSelect, action, titleLanguage = 'english' }: AnimeCardProps) {
   const imageUrl = anime.images?.jpg?.large_image_url;
-  const title = anime.title || 'Unknown Title';
+  const title = titleLanguage === 'japanese' 
+    ? (anime.title_japanese || anime.title_english || anime.title)
+    : (anime.title || 'Unknown Title');
   const year = anime.year;
   const episodes = anime.episodes;
   const score = anime.score;
