@@ -24,7 +24,7 @@ interface SearchResultsProps {
   onStatusChange?: (anime: AnimeFromApi, status: AnimeStatus) => void;
   isInList?: (malId: number) => boolean;
   getUserStatus?: (malId: number) => AnimeStatus | null;
-  titleLanguage?: 'english' | 'japanese';
+  titleLanguage?: 'english' | 'japanese' | 'kanji';
 }
 
 export function SearchResults({ query, results, loading, error, pagination, onPageChange, onAnimeSelect, onStatusChange, isInList, getUserStatus, titleLanguage = 'english' }: SearchResultsProps) {

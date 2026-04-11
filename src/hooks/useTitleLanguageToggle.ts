@@ -1,23 +1,30 @@
 import { useState, useCallback, useEffect } from 'react';
 
+type TitleLanguage = 'english' | 'japanese' | 'kanji';
+
 const STORAGE_KEY = 'anime-tracker-title-language';
 
-function getStoredLanguage(): boolean {
-  if (typeof window === 'undefined') return false;
+function getStoredLanguage(): TitleLanguage {
+  if (typeof window === 'undefined') return 'english';
   const stored = localStorage.getItem(STORAGE_KEY);
-  return stored === 'japanese';
+  if (stored === 'japanese' || stored === 'kanji') return stored;
+  return 'english';
 }
 
 export function useTitleLanguageToggle() {
-  const [isJapanese, setIsJapanese] = useState<boolean>(() => getStoredLanguage());
+  const [titleLanguage, setTitleLanguage] = useState<TitleLanguage>(() => getStoredLanguage());
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, isJapanese ? 'japanese' : 'english');
-  }, [isJapanese]);
+    localStorage.setItem(STORAGE_KEY, titleLanguage);
+  }, [titleLanguage]);
 
   const toggle = useCallback(() => {
-    setIsJapanese(prev => !prev);
+    setTitleLanguage(prev => {
+      if (prev === 'english') return 'japanese';
+      if (prev === 'japanese') return 'kanji';
+      return 'english';
+    });
   }, []);
 
-  return { isJapanese, toggle };
+  return { titleLanguage, toggle };
 }

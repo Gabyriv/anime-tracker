@@ -24,7 +24,7 @@ function App() {
   
   const { query, setQuery, results, loading, error: searchError, page, setPage, pagination } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
-  const { isJapanese, toggle: toggleTitleLanguage } = useTitleLanguageToggle();
+  const { titleLanguage, toggle: toggleTitleLanguage } = useTitleLanguageToggle();
 
   // Status labels for toast formatting
   const statusLabels: Record<string, string> = {
@@ -66,9 +66,12 @@ function App() {
   };
 
   const getModalTitle = (anime: AnimeFromApi) => {
-    return isJapanese 
-      ? (anime.title_japanese || anime.title_english || anime.title)
-      : (anime.title);
+    if (titleLanguage === 'japanese' && anime.title_english) {
+      return anime.title_english;
+    } else if (titleLanguage === 'kanji' && anime.title_japanese) {
+      return anime.title_japanese;
+    }
+    return anime.title;
   };
 
   if (error) return <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-deep)] text-red-400">Database Error: {error}</div>;
@@ -91,7 +94,7 @@ function App() {
                 query={query}
                 setQuery={setQuery}
                 loading={loading}
-                isJapanese={isJapanese}
+                titleLanguage={titleLanguage}
                 onLanguageToggle={toggleTitleLanguage}
               />
               <div className="flex gap-3">
@@ -134,7 +137,7 @@ function App() {
               onStatusChange={handleStatusChange}
               isInList={isInList}
               getUserStatus={getUserStatus}
-              titleLanguage={isJapanese ? 'japanese' : 'english'}
+              titleLanguage={titleLanguage}
             />
             
             {loading && (

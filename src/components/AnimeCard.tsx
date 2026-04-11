@@ -5,14 +5,19 @@ interface AnimeCardProps {
   anime: AnimeFromApi;
   onSelect?: (anime: AnimeFromApi) => void;
   action?: ReactNode;
-  titleLanguage?: 'english' | 'japanese';
+  titleLanguage?: 'english' | 'japanese' | 'kanji';
 }
 
 export function AnimeCard({ anime, onSelect, action, titleLanguage = 'english' }: AnimeCardProps) {
   const imageUrl = anime.images?.jpg?.large_image_url;
-  const title = titleLanguage === 'japanese' 
-    ? (anime.title_japanese || anime.title_english || anime.title)
-    : (anime.title || 'Unknown Title');
+  
+  // titleLanguage: 'english' = default, 'japanese' = romanized, 'kanji' = literal Japanese
+  let title = anime.title || 'Unknown Title';
+  if (titleLanguage === 'japanese' && anime.title_english) {
+    title = anime.title_english;
+  } else if (titleLanguage === 'kanji' && anime.title_japanese) {
+    title = anime.title_japanese;
+  }
   const year = anime.year;
   const episodes = anime.episodes;
   const score = anime.score;

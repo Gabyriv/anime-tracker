@@ -4,11 +4,11 @@ interface SearchHeaderProps {
   query: string;
   setQuery: (q: string) => void;
   loading?: boolean;
-  isJapanese: boolean;
+  titleLanguage: 'english' | 'japanese' | 'kanji';
   onLanguageToggle: () => void;
 }
 
-export function SearchHeader({ query, setQuery, loading, isJapanese, onLanguageToggle }: SearchHeaderProps) {
+export function SearchHeader({ query, setQuery, loading, titleLanguage, onLanguageToggle }: SearchHeaderProps) {
   const [expanded, setExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,13 +47,13 @@ export function SearchHeader({ query, setQuery, loading, isJapanese, onLanguageT
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <button
                 onClick={onLanguageToggle}
-                className={`text-xs px-2 py-1 rounded font-medium transition-colors ${
-                  isJapanese 
-                    ? 'bg-[var(--color-accent)] text-white' 
-                    : 'bg-[var(--color-bg-elevated)] text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)]'
-                }`}
+                className="text-xs px-2 py-1 rounded font-medium bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] transition-colors"
               >
-                {isJapanese ? 'JP' : 'EN'}
+                <span className={titleLanguage === 'english' ? 'text-[var(--color-accent)] font-bold' : 'text-[var(--color-foreground-muted)]'}>EN</span>
+                <span className="mx-0.5 text-[var(--color-foreground-muted)]">/</span>
+                <span className={titleLanguage === 'japanese' ? 'text-[var(--color-accent)] font-bold' : 'text-[var(--color-foreground-muted)]'}>JP</span>
+                <span className="mx-0.5 text-[var(--color-foreground-muted)]">/</span>
+                <span className={titleLanguage === 'kanji' ? 'text-[var(--color-accent)] font-bold' : 'text-[var(--color-foreground-muted)]'}>漢</span>
               </button>
               {query.length > 0 && !loading && (
                 <button
