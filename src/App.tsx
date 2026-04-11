@@ -7,6 +7,8 @@ import { SearchResults } from './components/SearchResults';
 import { UserList } from './components/UserList';
 import { StatusDropdown } from './components/StatusDropdown';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './components/ui/Dialog';
+import { ToastContainer } from './components/ui/ToastContainer';
+import { ToastProvider, setToastFunction, toast, useToast } from './context/ToastContext';
 import { AnimeFromApi, AnimeStatus } from './types/anime';
 
 type ViewMode = 'search' | 'list';
@@ -19,12 +21,17 @@ function App() {
   
   const { query, setQuery, results, loading, error: searchError, page, setPage, pagination } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
+  const { addToast } = useToast();
 
   useEffect(() => {
     initDb()
       .then(() => setDbReady(true))
       .catch((err) => setError(err.message));
   }, []);
+
+  useEffect(() => {
+    setToastFunction(addToast);
+  }, [addToast]);
 
   const isInList = (malId: number) => {
     return list.some(item => item.mal_id === malId);
@@ -40,9 +47,11 @@ function App() {
       const entry = list.find(item => item.mal_id === anime.mal_id);
       if (entry) {
         await updateStatus(entry.id, status);
+        toast(`Status updated to ${status.replace('_', ' ')}`);
       }
     } else {
       await addToList(anime, status);
+      toast(`Added to ${status.replace('_', ' ')} list`);
     }
   };
 
@@ -50,12 +59,13 @@ function App() {
   if (!dbReady) return <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-deep)] text-[var(--color-foreground)]">Initializing database...</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#020203] text-[var(--color-foreground)]">
-      <header className="p-6 border-b border-[var(--color-border)]">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">
-            <span className="text-[var(--color-accent)]">Anime</span> Tracker
-          </h1>
+    <ToastProvider>
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#020203] text-[var(--color-foreground)]">
+        <header className="p-6 border-b border-[var(--color-border)]">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold tracking-tight">
+              <span className="text-[var(--color-accent)]">Anime</span> Tracker
+            </h1>
           
           <div className="flex gap-3">
             <button
@@ -197,7 +207,9 @@ function App() {
           )}
         </DialogContent>
       </Dialog>
+      <ToastContainer />
     </div>
+    </ToastProvider>
   );
 }
 
