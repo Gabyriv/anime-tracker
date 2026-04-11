@@ -1,6 +1,7 @@
 import { AnimeFromApi, AnimeStatus } from '../types/anime';
 import { PaginationInfo } from '../lib/api';
 import { AnimeCard } from './AnimeCard';
+import { SearchResultsSkeleton } from './ui/Skeleton';
 import { Dropdown, DropdownItem } from './ui/Dropdown';
 import { Pagination } from './Pagination';
 
@@ -44,11 +45,7 @@ export function SearchResults({ query, results, loading, error, pagination, onPa
   }
   
   if (loading) {
-    return (
-      <div className="p-8 text-center text-gray-400">
-        Searching...
-      </div>
-    );
+    return <SearchResultsSkeleton />;
   }
   
   if (error) {
