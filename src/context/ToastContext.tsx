@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 
 type ToastType = 'success' | 'error' | 'info';
 
@@ -25,9 +25,10 @@ export function useToast() {
 
 interface ToastProviderProps {
   children: ReactNode;
+  setToastFunction: React.Dispatch<React.SetStateAction<((message: string, type?: ToastType) => void) | null>>;
 }
 
-export function ToastProvider({ children }: ToastProviderProps) {
+export function ToastProvider({ children, setToastFunction }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = useCallback((message: string, type: ToastType = 'success') => {
@@ -39,6 +40,10 @@ export function ToastProvider({ children }: ToastProviderProps) {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 3000);
   }, []);
+
+  useEffect(() => {
+    setToastFunction(addToast);
+  }, [addToast, setToastFunction]);
 
   return (
     <ToastContext.Provider value={{ toasts, addToast }}>

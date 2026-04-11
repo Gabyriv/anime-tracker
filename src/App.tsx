@@ -21,7 +21,7 @@ function App() {
   
   const { query, setQuery, results, loading, error: searchError, page, setPage, pagination } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
-  const { addToast } = useToast();
+  const [addToast, setAddToast] = useState<((msg: string, type?: any) => void) | null>(null);
 
   useEffect(() => {
     initDb()
@@ -30,7 +30,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    setToastFunction(addToast);
+    if (addToast) {
+      setToastFunction(addToast);
+    }
   }, [addToast]);
 
   const isInList = (malId: number) => {
@@ -59,7 +61,8 @@ function App() {
   if (!dbReady) return <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-deep)] text-[var(--color-foreground)]">Initializing database...</div>;
 
   return (
-    <ToastProvider>
+    <ToastProvider setToastFunction={setAddToast}>
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#020203] text-[var(--color-foreground)]">
       <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#020203] text-[var(--color-foreground)]">
         <header className="p-6 border-b border-[var(--color-border)]">
           <div className="flex items-center justify-between">
