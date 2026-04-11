@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { initDb } from './lib/db';
 import { useSearch } from './hooks/useSearch';
 import { useAnimeList } from './hooks/useAnimeList';
+import { useTitleLanguageToggle } from './hooks/useTitleLanguageToggle';
 import { SearchBar } from './components/SearchBar';
 import { SearchResults } from './components/SearchResults';
 import { UserList } from './components/UserList';
@@ -23,6 +24,7 @@ function App() {
   
   const { query, setQuery, results, loading, error: searchError, page, setPage, pagination } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
+  const { isJapanese, toggle: toggleTitleLanguage } = useTitleLanguageToggle();
 
   // Status labels for toast formatting
   const statusLabels: Record<string, string> = {
@@ -61,6 +63,12 @@ function App() {
       await addToList(anime, status);
       if (toastFnRef.current) toastFnRef.current(`Added to ${formatStatusLabel(status)} list`, 'success', status);
     }
+  };
+
+  const getModalTitle = (anime: AnimeFromApi) => {
+    return isJapanese 
+      ? (anime.title_japanese || anime.title_english || anime.title)
+      : (anime.title);
   };
 
   if (error) return <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-deep)] text-red-400">Database Error: {error}</div>;
@@ -109,6 +117,8 @@ function App() {
                 setQuery={setQuery}
                 loading={loading}
                 error={searchError}
+                titleLanguage={isJapanese ? 'japanese' : 'english'}
+                onTitleLanguageToggle={toggleTitleLanguage}
               />
             </div>
             
@@ -123,6 +133,7 @@ function App() {
               onStatusChange={handleStatusChange}
               isInList={isInList}
               getUserStatus={getUserStatus}
+              titleLanguage={isJapanese ? 'japanese' : 'english'}
             />
             
             {loading && (
@@ -153,13 +164,13 @@ function App() {
               
               {/* Details section */}
               <div className="flex-1 flex flex-col">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl">{selectedAnime.title}</DialogTitle>
+              <DialogHeader>
+                <DialogTitle className="text-2xl">{getModalTitle(selectedAnime)}</DialogTitle>
                   <DialogDescription className="flex flex-wrap gap-3 mt-2">
-                    {selectedAnime.year && <span className="bg-[var(--color-surface)] px-2 py-1 rounded text-xs">Year: {selectedAnime.year}</span>}
-                    {selectedAnime.episodes && <span className="bg-[var(--color-surface)] px-2 py-1 rounded text-xs">{selectedAnime.episodes} episodes</span>}
-                    {selectedAnime.status && <span className="bg-[var(--color-surface)] px-2 py-1 rounded text-xs capitalize">{selectedAnime.status?.replace('_', ' ')}</span>}
-                    {selectedAnime.score && <span className="bg-[var(--color-surface)] px-2 py-1 rounded text-xs text-amber-400">★ {selectedAnime.score}</span>}
+                    {selectedAnime.year && <span className="bg-[var(--color-surface)] ml-0 mr-1 px-3 py-1 rounded text-xs">Year: {selectedAnime.year}</span>}
+                    {selectedAnime.episodes && <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs">{selectedAnime.episodes} episodes</span>}
+                    {selectedAnime.status && <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs capitalize">{selectedAnime.status?.replace('_', ' ')}</span>}
+                    {selectedAnime.score && <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs text-amber-400">★ {selectedAnime.score}</span>}
                   </DialogDescription>
                 </DialogHeader>
                 
