@@ -12,18 +12,21 @@ export function Pagination({ pagination, onPageChange, loading }: PaginationProp
   const handlePrev = () => {
     if (has_prev_page && !loading) {
       onPageChange(current_page - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
   
   const handleNext = () => {
     if (has_next_page && !loading) {
       onPageChange(current_page + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
   
   const handlePageNum = (page: number) => {
     if (page !== current_page && !loading) {
       onPageChange(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
   
