@@ -16,10 +16,21 @@ export function SearchBar({ query, setQuery, loading, error }: SearchBarProps) {
           placeholder="Search anime..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full bg-[var(--color-surface)] text-[var(--color-foreground)] border border-[var(--color-border)] rounded-xl px-5 py-4 
+          className="w-full bg-[var(--color-surface)] text-[var(--color-foreground)] border border-[var(--color-border)] rounded-xl px-5 py-4 pr-12
                      placeholder-[var(--color-foreground-muted)] focus:outline-none focus:border-[var(--color-accent)] focus:ring-2 
                      focus:ring-[var(--color-accent-glow)] transition-all duration-200 text-lg"
         />
+        {query.length > 0 && !loading && (
+          <button
+            onClick={() => setQuery('')}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] p-1 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
+            aria-label="Clear search"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
         {loading && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2">
             <div className="w-5 h-5 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin"></div>
