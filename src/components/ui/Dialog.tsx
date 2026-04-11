@@ -21,8 +21,14 @@ const Dialog = React.forwardRef<
       <div
         ref={ref}
         className="relative z-50 bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-2xl p-6 pt-12 max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl animate-scaleIn"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         {...props}
       >
+        <style>{`
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
         <button
           onClick={() => onOpenChange?.(false)}
           className="absolute top-3 right-3 text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors z-10"
