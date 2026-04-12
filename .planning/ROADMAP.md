@@ -85,12 +85,21 @@ Plans:
 ### Phase 7: Keyboard Shortcuts
 **Goal:** Add keyboard shortcuts for common actions (Esc to close modal, / to focus search)
 **Depends on:** Phase 6
-**Status:** ☐ Planned
-**Requirements:** UX-05, UX-06
+**Status:** ✓ Complete (2026-04-11)
+**Plans:** 1 plan (1 task)
+
+Plans:
+- [x] 07-01: Keyboard shortcuts hook + App integration
+
+### Phase 8: Search Enhancements
+**Goal:** Add category/type filters and default view options for search tab
+**Depends on:** Phase 7
+**Status:** ☐ Pending
+**Requirements:** SECH-05, SECH-06
 **Plans:** 1 plan
 
 Plans:
-- [ ] 07-01: Add keyboard shortcuts for Escape (close modal) and "/" (focus search)
+- [ ] 08-01: Category filters + default view options
 
 ---
 
