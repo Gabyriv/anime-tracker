@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { useAnimeList } from '../hooks/useAnimeList';
 import { UserListCard } from './UserListCard';
 import { StatusFilter } from './StatusFilter';
 import { AnimeStatus } from '../types/anime';
@@ -12,8 +11,25 @@ const STATUS_GROUPS: { status: AnimeStatus; label: string }[] = [
   { status: 'dropped', label: 'Dropped' }
 ];
 
-export function UserList() {
-  const { list, loading, error, updateStatus, removeFromList, updateEpisodeProgress, refresh } = useAnimeList();
+interface UserListProps {
+  list: any[];
+  loading: boolean;
+  error: string | null;
+  updateStatus: (entryId: number, status: AnimeStatus) => Promise<void>;
+  removeFromList: (entryId: number) => Promise<void>;
+  updateEpisodeProgress: (entryId: number, episodes: number) => Promise<void>;
+  refresh: () => void;
+}
+
+export function UserList({
+  list,
+  loading,
+  error,
+  updateStatus,
+  removeFromList,
+  updateEpisodeProgress,
+  refresh,
+}: UserListProps) {
   const [currentFilter, setCurrentFilter] = useState<AnimeStatus | 'all'>('all');
   
   // Calculate counts for each status

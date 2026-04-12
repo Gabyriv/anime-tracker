@@ -5,7 +5,6 @@ import { useAnimeList } from './hooks/useAnimeList';
 import { useTitleLanguageToggle } from './hooks/useTitleLanguageToggle';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { SearchHeader } from './components/SearchHeader';
-import { SearchBar } from './components/SearchBar';
 import { SearchResults } from './components/SearchResults';
 import { UserList } from './components/UserList';
 import { StatusDropdown } from './components/StatusDropdown';
@@ -26,7 +25,16 @@ function App() {
   const toastFnRef = useRef<((msg: string, type?: string, status?: string) => void) | null>(null);
   
   const { query, setQuery, results, loading, error: searchError, page, setPage, pagination, category, setCategory, defaultView, setDefaultView, genres, selectedGenreId, setGenre } = useSearch();
-  const { list, addToList, updateStatus } = useAnimeList();
+  const {
+    list,
+    loading: listLoading,
+    error: listError,
+    addToList,
+    updateStatus,
+    removeFromList,
+    updateEpisodeProgress,
+    refresh: refreshList,
+  } = useAnimeList();
   const { titleLanguage, toggle: toggleTitleLanguage } = useTitleLanguageToggle();
 
   // Keyboard shortcuts
@@ -137,16 +145,6 @@ function App() {
       <main className="container mx-auto px-4 py-6">
         {viewMode === 'search' && (
           <>
-            <div className="mb-6">
-              <SearchBar 
-                query={query}
-                setQuery={setQuery}
-                loading={loading}
-                error={searchError}
-                titleLanguage={titleLanguage}
-                onTitleLanguageToggle={toggleTitleLanguage}
-              />
-            </div>
             <SearchResults 
               query={query}
               results={results}
@@ -175,7 +173,15 @@ function App() {
         )}
         
         {viewMode === 'list' && (
-          <UserList />
+          <UserList
+            list={list}
+            loading={listLoading}
+            error={listError}
+            updateStatus={updateStatus}
+            removeFromList={removeFromList}
+            updateEpisodeProgress={updateEpisodeProgress}
+            refresh={refreshList}
+          />
         )}
       </main>
       
