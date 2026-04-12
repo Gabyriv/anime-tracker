@@ -32,10 +32,10 @@ export function AnimeCard({ anime, onSelect, action, titleLanguage = 'english' }
           <img 
             src={imageUrl} 
             alt={title}
-            className="w-full h-100 object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-56 sm:h-72 md:h-100 object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-100 bg-[var(--color-bg-elevated)] flex items-center justify-center">
+          <div className="w-full h-56 sm:h-72 md:h-100 bg-[var(--color-bg-elevated)] flex items-center justify-center">
             <span className="text-[var(--color-foreground-muted)]">No Image</span>
           </div>
         )}
