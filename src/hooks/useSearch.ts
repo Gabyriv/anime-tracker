@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { searchAnime, getTopAnime, SearchError, PaginationInfo } from '../lib/api';
+import { searchAnime, getTopAnime, getLatestAnime, getSeasonalAnime, SearchError, PaginationInfo } from '../lib/api';
 import { AnimeFromApi } from '../types/anime';
+
+export type DefaultView = 'popular' | 'latest' | 'seasonal';
 
 interface UseSearchResult {
   query: string;
@@ -13,6 +15,10 @@ interface UseSearchResult {
   pagination: PaginationInfo;
   loadTopAnime: (pageNum?: number) => Promise<void>;
   isBrowseMode: boolean;
+  category: string;
+  setCategory: React.Dispatch<React.SetStateAction<string>>;
+  defaultView: DefaultView;
+  setDefaultView: React.Dispatch<React.SetStateAction<DefaultView>>;
 }
 
 export function useSearch(): UseSearchResult {
@@ -29,6 +35,12 @@ export function useSearch(): UseSearchResult {
     has_prev_page: false,
   });
   
+  // Category filter state (session-only, no localStorage)
+  const [category, setCategory] = useState('');
+  
+  // Default view state (session-only, no localStorage)
+  const [defaultView, setDefaultView] = useState<DefaultView>('popular');
+  
   // Determine if we're in browse mode (empty query) or search mode
   const isBrowseMode = query.trim() === '';
   
@@ -39,20 +51,38 @@ export function useSearch(): UseSearchResult {
   const abortControllerRef = useRef<AbortController | null>(null);
   const queryRef = useRef(query);
   const pageRef = useRef(page);
+  const categoryRef = useRef(category);
+  const defaultViewRef = useRef(defaultView);
   queryRef.current = query;
   pageRef.current = page;
+  categoryRef.current = category;
+  defaultViewRef.current = defaultView;
   
   const loadTopAnime = useCallback(async (pageNum?: number) => {
     const targetPage = pageNum ?? browsePage;
     setLoading(true);
     setError(null);
+    
+    const currentCategory = categoryRef.current;
+    const currentView = defaultViewRef.current;
+    
     try {
-      const { results: data, pagination: pag, error: searchError } = await getTopAnime(targetPage);
+      let results, pagination, searchError;
+      
+      if (currentView === 'latest') {
+        ({ results, pagination, error: searchError } = await getLatestAnime(targetPage, 20, currentCategory || undefined));
+      } else if (currentView === 'seasonal') {
+        ({ results, pagination, error: searchError } = await getSeasonalAnime(targetPage, 20, currentCategory || undefined));
+      } else {
+        // Default: popular
+        ({ results, pagination, error: searchError } = await getTopAnime(targetPage, 20, currentCategory || undefined));
+      }
+      
       if (searchError) {
         setError(searchError.message);
       } else {
-        setResults(data);
-        setPagination(pag);
+        setResults(results);
+        setPagination(pagination);
         setBrowsePage(targetPage);
       }
     } catch (err) {
@@ -69,6 +99,7 @@ export function useSearch(): UseSearchResult {
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
       const currentQuery = queryRef.current;
+      const currentCategory = categoryRef.current;
       
       if (!currentQuery.trim()) {
         await loadTopAnime(browsePage);
@@ -84,7 +115,7 @@ export function useSearch(): UseSearchResult {
       setError(null);
       
       try {
-        const { results: data, pagination: pag, error: searchError } = await searchAnime(currentQuery, searchPage);
+        const { results: data, pagination: pag, error: searchError } = await searchAnime(currentQuery, searchPage, 20, currentCategory || undefined);
         
         if (queryRef.current === currentQuery) {
           if (searchError) {
@@ -109,7 +140,22 @@ export function useSearch(): UseSearchResult {
     }, 500);
     
     return () => clearTimeout(timeoutId);
-  }, [query, browsePage, searchPage, loadTopAnime]);
+  }, [query, browsePage, searchPage, category, loadTopAnime]);
 
-  return { query, setQuery, results, loading, error, page, setPage, pagination, loadTopAnime, isBrowseMode };
+  return { 
+    query, 
+    setQuery, 
+    results, 
+    loading, 
+    error, 
+    page, 
+    setPage, 
+    pagination, 
+    loadTopAnime, 
+    isBrowseMode,
+    category,
+    setCategory,
+    defaultView,
+    setDefaultView
+  };
 }
