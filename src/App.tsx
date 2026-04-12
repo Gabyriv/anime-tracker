@@ -92,6 +92,8 @@ function App() {
   };
 
   if (error) return <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-deep)] text-red-400">Database Error: {error}</div>;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   if (!dbReady) return <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-deep)] text-[var(--color-foreground)]">Initializing database...</div>;
 
   return (
@@ -116,7 +118,9 @@ function App() {
                 expanded={searchExpanded}
                 setExpanded={setSearchExpanded}
               />
-              <div className="flex gap-3">
+              
+              {/* Desktop tabs - hidden on mobile */}
+              <div className="hidden md:flex gap-3">
                 <button
                   onClick={() => setViewMode('search')}
                   className={`h-10 px-5 rounded-xl font-medium transition-all duration-200 flex items-center ${
@@ -138,8 +142,53 @@ function App() {
                   My List ({list.length})
                 </button>
               </div>
+              
+              {/* Mobile burger menu */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)] transition-colors"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
+          
+          {/* Mobile menu dropdown */}
+          {mobileMenuOpen && (
+            <div className="md:hidden mt-4 pt-4 border-t border-[var(--color-border)]">
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => { setViewMode('search'); setMobileMenuOpen(false); }}
+                  className={`w-full h-12 px-5 rounded-xl font-medium transition-all duration-200 flex items-center justify-center ${
+                    viewMode === 'search' 
+                      ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]' 
+                      : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
+                  }`}
+                >
+                  Home
+                </button>
+                <button
+                  onClick={() => { setViewMode('list'); setMobileMenuOpen(false); }}
+                  className={`w-full h-12 px-5 rounded-xl font-medium transition-all duration-200 flex items-center justify-center ${
+                    viewMode === 'list' 
+                      ? 'bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-glow)]' 
+                      : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
+                  }`}
+                >
+                  My List ({list.length})
+                </button>
+              </div>
+            </div>
+          )}
         </header>
       
       <main className="container mx-auto px-4 py-6">

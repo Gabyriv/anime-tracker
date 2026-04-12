@@ -137,7 +137,7 @@ export function useSearch(): UseSearchResult {
     loadTopAnime(1);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Search debounce - only for actual search queries, NOT for filter changes
+  // Search debounce - runs when query OR filter/page changes while in search mode
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
       const currentQuery = queryRef.current;
@@ -191,17 +191,16 @@ export function useSearch(): UseSearchResult {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [query]); // Only query triggers search - filters have separate effect
+  }, [query, selectedGenreId, category, page]); // Re-run when filters change during search mode
 
-  // Page changes for browse mode — only fires when page actually changes
+  // Query changes - handle search vs browse transitions
   useEffect(() => {
-    const prev = prevBrowsePageRef.current;
-    prevBrowsePageRef.current = browsePage;
-    if (prev === browsePage) return; // skip initial mount and StrictMode re-runs
-    if (!query.trim()) {
-      loadTopAnime(browsePage);
+    // When query goes from something to empty, return to browse mode
+    if (!query.trim() && queryRef.current.trim()) {
+      // Query was cleared - reload browse data
+      loadTopAnime(1);
     }
-  }, [browsePage]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter changes - only fire when values actually changed (guards against StrictMode re-runs)
   useEffect(() => {

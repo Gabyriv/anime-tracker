@@ -45,6 +45,16 @@
 - **UX-05**: User can press Escape to close any open modal/dialog
 - **UX-06**: User can press / to focus the search input
 
+### Search Enhancements
+
+- **SECH-05**: User can filter search by anime type (TV, Movie, OVA, Special, ONA, Music)
+- **SECH-06**: User can choose default view when search tab has no query (Latest, Popular, Seasonal)
+
+### Layout Fixes
+
+- **UX-07**: User can filter search by genre (Action, Adventure, Comedy, Isekai, Game, etc.)
+- **UX-08**: Anime cards positioned left with filter badges in right-side space
+
 ## Out of Scope
 
 | Feature | Reason |

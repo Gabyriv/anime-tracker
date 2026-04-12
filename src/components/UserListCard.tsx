@@ -58,6 +58,16 @@ export function UserListCard({
     ? `${episodesWatched} / ${totalEpisodes} eps`
     : `Ep ${episodesWatched}`;
   
+  const handleEpisodeIncrement = () => {
+    onEpisodeChange(entry.id, episodesWatched + 1);
+  };
+  
+  const handleEpisodeDecrement = () => {
+    if (episodesWatched > 0) {
+      onEpisodeChange(entry.id, episodesWatched - 1);
+    }
+  };
+  
   return (
     <div className="glass-card flex flex-row overflow-visible">
       {imageUrl ? (
@@ -79,13 +89,35 @@ export function UserListCard({
           
           <div className="flex items-center gap-2 mt-2">
             <span className="text-[var(--color-foreground-muted)] text-xs">{episodeDisplay}</span>
-            <input
-              type="number"
-              min="0"
-              value={episodesWatched}
-              onChange={(e) => onEpisodeChange(entry.id, parseInt(e.target.value) || 0)}
-              className="w-12 bg-[var(--color-surface)] text-[var(--color-foreground)] text-xs px-2 py-1 rounded-lg border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none"
-            />
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleEpisodeDecrement}
+                className="w-6 h-6 flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-foreground-muted)] rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)] transition-colors text-sm"
+                disabled={episodesWatched <= 0}
+              >
+                −
+              </button>
+              <input
+                type="number"
+                min="0"
+                max={totalEpisodes || undefined}
+                value={episodesWatched}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    onEpisodeChange(entry.id, val);
+                  }
+                }}
+                className="w-12 bg-[var(--color-surface)] text-[var(--color-foreground)] text-xs px-2 py-1 rounded-lg border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <button
+                onClick={handleEpisodeIncrement}
+                className="w-6 h-6 flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-foreground-muted)] rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)] transition-colors text-sm"
+                disabled={totalEpisodes !== null && episodesWatched >= totalEpisodes}
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
         

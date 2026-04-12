@@ -76,20 +76,34 @@ export function SearchResults({
 }: SearchResultsProps) {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   
-  const handleStatusChange = (anime: AnimeFromApi, status: AnimeStatus) => {
-    onStatusChange?.(anime, status);
-  };
-  
+  // Close mobile filters when selecting a filter (single-select behavior)
   const handleGenreClick = (genreId: number) => {
     if (onGenreChange) {
-      // Single-select: if clicking already selected, clear it; otherwise set new
-      onGenreChange(selectedGenreId === genreId ? null : genreId);
+      const newGenreId = selectedGenreId === genreId ? null : genreId;
+      onGenreChange(newGenreId);
+      // Auto-close panel when selecting a genre
+      if (selectedGenreId !== genreId) {
+        setShowMobileFilters(false);
+      }
     }
+  };
+  
+  const handleCategoryClick = (catValue: string) => {
+    onCategoryChange?.(catValue);
+    // Auto-close panel when selecting a category
+    setShowMobileFilters(false);
+  };
+  
+  const handleViewClick = (viewValue: DefaultView) => {
+    onDefaultViewChange?.(viewValue);
+    // Auto-close panel when selecting a view
+    setShowMobileFilters(false);
   };
   
   const clearAllFilters = () => {
     onGenreChange?.(null);
     onCategoryChange?.('');
+    setShowMobileFilters(false);
   };
   
   const hasActiveFilters = selectedGenreId || category;
@@ -152,27 +166,29 @@ export function SearchResults({
         {/* Mobile Filter Panel */}
         {showMobileFilters && (
           <div className="mt-3 p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
-            {/* Genres */}
-            <div className="mb-4">
-              <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">Genres</h4>
-              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
-                {genres.map((genre) => (
-                  <button
-                    key={genre.mal_id}
-                    onClick={() => handleGenreClick(genre.mal_id)}
-                    className={`text-xs px-2 py-1 rounded-lg font-medium transition-all duration-200 ${
-                      selectedGenreId === genre.mal_id
-                        ? 'bg-[var(--color-accent)] text-white'
-                        : 'bg-[var(--color-bg-deep)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)]'
-                    }`}
-                  >
-                    {genre.name}
-                  </button>
-                ))}
+            {/* Default View - First */}
+            {onDefaultViewChange && (
+              <div className="mb-4">
+                <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">View</h4>
+                <div className="flex items-center gap-1 bg-[var(--color-bg-deep)] rounded-lg p-1 border border-[var(--color-border)]">
+                  {DEFAULT_VIEWS.map((view) => (
+                    <button
+                      key={view.value}
+                      onClick={() => onDefaultViewChange(view.value)}
+                      className={`flex-1 text-xs px-2.5 py-1.5 rounded-md font-medium transition-all duration-200 ${
+                        defaultView === view.value
+                          ? 'bg-[var(--color-accent)] text-white'
+                          : 'text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)]'
+                      }`}
+                    >
+                      {view.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
             
-            {/* Category */}
+            {/* Category/Type - Second */}
             {onCategoryChange && (
               <div className="mb-4">
                 <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">Type</h4>
@@ -194,27 +210,25 @@ export function SearchResults({
               </div>
             )}
             
-            {/* Default View */}
-            {onDefaultViewChange && (
-              <div className="mb-4">
-                <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">View</h4>
-                <div className="flex items-center gap-1 bg-[var(--color-bg-deep)] rounded-lg p-1 border border-[var(--color-border)]">
-                  {DEFAULT_VIEWS.map((view) => (
-                    <button
-                      key={view.value}
-                      onClick={() => onDefaultViewChange(view.value)}
-                      className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all duration-200 ${
-                        defaultView === view.value
-                          ? 'bg-[var(--color-accent)] text-white'
-                          : 'text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)]'
-                      }`}
-                    >
-                      {view.label}
-                    </button>
-                  ))}
-                </div>
+            {/* Genres - Third */}
+            <div className="mb-4">
+              <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">Genres</h4>
+              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+                {genres.map((genre) => (
+                  <button
+                    key={genre.mal_id}
+                    onClick={() => handleGenreClick(genre.mal_id)}
+                    className={`text-xs px-2 py-1 rounded-lg font-medium transition-all duration-200 ${
+                      selectedGenreId === genre.mal_id
+                        ? 'bg-[var(--color-accent)] text-white'
+                        : 'bg-[var(--color-bg-deep)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)]'
+                    }`}
+                  >
+                    {genre.name}
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
             
             {/* Clear Filters */}
             {hasActiveFilters && (
@@ -230,10 +244,10 @@ export function SearchResults({
       </div>
       
       {/* Main Layout: Results + Right Panel */}
-      <div className="flex gap-6">
-        {/* Results Grid - Left Aligned */}
-        <div className="flex-1">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-start">
+      <div className="flex gap-4 -mx-2">
+        {/* Results Grid - Maximize left space, cards flush to left */}
+        <div className="flex-1 min-w-0 px-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 justify-start">
             {results.map((anime) => {
               const inList = isInList?.(anime.mal_id);
               const userStatus = getUserStatus?.(anime.mal_id);
@@ -265,7 +279,7 @@ export function SearchResults({
                         {STATUS_OPTIONS.map(option => (
                           <DropdownItem
                             key={option.value}
-                            onSelect={() => handleStatusChange(anime, option.value)}
+                            onSelect={() => onStatusChange?.(anime, option.value)}
                           >
                             {option.label}
                           </DropdownItem>
@@ -286,32 +300,34 @@ export function SearchResults({
         </div>
         
         {/* Right Panel - Only on lg+ screens */}
-        <div className="hidden lg:block w-[260px] flex-shrink-0">
-          <div className="sticky top-4 space-y-4">
-            {/* Genres Section */}
-            <div className="p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
-              <h3 className="text-sm font-semibold mb-3 text-[var(--color-foreground)]">Genres</h3>
-              <div className="flex flex-wrap gap-1.5 max-h-[300px] overflow-y-auto">
-                {genres.map((genre) => (
-                  <button
-                    key={genre.mal_id}
-                    onClick={() => handleGenreClick(genre.mal_id)}
-                    className={`text-xs px-2 py-1 rounded-lg font-medium transition-all duration-200 ${
-                      selectedGenreId === genre.mal_id
-                        ? 'bg-[var(--color-accent)] text-white shadow-[0_0_12px_rgba(94,106,210,0.4)]'
-                        : 'bg-[var(--color-bg-deep)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)]'
-                    }`}
-                  >
-                    {genre.name}
-                  </button>
-                ))}
+        <div className="hidden lg:block w-[180px] flex-shrink-0">
+          <div className="sticky top-4 space-y-2">
+            {/* View Selector - Most prominent */}
+            {onDefaultViewChange && (
+              <div className="p-3 bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-bg-deep)] rounded-xl border border-[var(--color-accent)]/30 shadow-lg">
+                <h3 className="text-xs font-semibold mb-2 text-[var(--color-accent)] uppercase tracking-wider">View</h3>
+                <div className="flex flex-col gap-1">
+                  {DEFAULT_VIEWS.map((view) => (
+                    <button
+                      key={view.value}
+                      onClick={() => onDefaultViewChange(view.value)}
+                      className={`text-sm px-3 py-2 rounded-lg font-medium transition-all duration-200 text-left ${
+                        defaultView === view.value
+                          ? 'bg-[var(--color-accent)] text-white shadow-[0_0_16px_rgba(94,106,210,0.5)]'
+                          : 'text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)]'
+                      }`}
+                    >
+                      {view.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
             
-            {/* Category Filter */}
+            {/* Type Filter */}
             {onCategoryChange && (
-              <div className="p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
-                <h3 className="text-sm font-semibold mb-3 text-[var(--color-foreground)]">Type</h3>
+              <div className="p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
+                <h3 className="text-xs font-semibold mb-2 text-[var(--color-foreground-muted)] uppercase tracking-wider">Type</h3>
                 <div className="flex flex-wrap gap-1.5">
                   {CATEGORIES.map((cat) => (
                     <button
@@ -330,27 +346,25 @@ export function SearchResults({
               </div>
             )}
             
-            {/* Default View Selector */}
-            {onDefaultViewChange && (
-              <div className="p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
-                <h3 className="text-sm font-semibold mb-3 text-[var(--color-foreground)]">View</h3>
-                <div className="flex items-center gap-1 bg-[var(--color-bg-deep)] rounded-lg p-1 border border-[var(--color-border)]">
-                  {DEFAULT_VIEWS.map((view) => (
-                    <button
-                      key={view.value}
-                      onClick={() => onDefaultViewChange(view.value)}
-                      className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all duration-200 ${
-                        defaultView === view.value
-                          ? 'bg-[var(--color-accent)] text-white'
-                          : 'text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)]'
-                      }`}
-                    >
-                      {view.label}
-                    </button>
-                  ))}
-                </div>
+            {/* Genres Section */}
+            <div className="p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
+              <h3 className="text-xs font-semibold mb-2 text-[var(--color-foreground-muted)] uppercase tracking-wider">Genres</h3>
+              <div className="flex flex-wrap gap-1.5 max-h-[280px] overflow-y-auto pr-1">
+                {genres.map((genre) => (
+                  <button
+                    key={genre.mal_id}
+                    onClick={() => handleGenreClick(genre.mal_id)}
+                    className={`text-xs px-2 py-1 rounded-lg font-medium transition-all duration-200 ${
+                      selectedGenreId === genre.mal_id
+                        ? 'bg-[var(--color-accent)] text-white shadow-[0_0_12px_rgba(94,106,210,0.4)]'
+                        : 'bg-[var(--color-bg-deep)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)]'
+                    }`}
+                  >
+                    {genre.name}
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
             
             {/* Clear Filters */}
             {hasActiveFilters && (
