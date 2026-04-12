@@ -72,7 +72,11 @@ export function useSearch(): UseSearchResult {
   const genreRef = useRef(selectedGenreId);
   const browsePageRef = useRef(browsePage);
   const searchPageRef = useRef(searchPage);
-  const filtersInitialized = useRef(false);
+  const initialLoadDone = useRef(false);
+  // Track last-seen filter values so StrictMode re-runs (same values) are ignored
+  const prevFiltersRef = useRef<{ category: string; genreId: number | null; view: DefaultView } | null>(null);
+  // Track last-seen browse page so initial mount and StrictMode re-runs are ignored
+  const prevBrowsePageRef = useRef(1);
 
   queryRef.current = query;
   categoryRef.current = category;
@@ -126,8 +130,10 @@ export function useSearch(): UseSearchResult {
     }
   }, []); // No deps - uses refs
 
-  // Initial load only
+  // Initial load only — guard prevents StrictMode double-fire
   useEffect(() => {
+    if (initialLoadDone.current) return;
+    initialLoadDone.current = true;
     loadTopAnime(1);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -187,19 +193,27 @@ export function useSearch(): UseSearchResult {
     return () => clearTimeout(timeoutId);
   }, [query]); // Only query triggers search - filters have separate effect
 
-  // Page changes for browse mode
+  // Page changes for browse mode — only fires when page actually changes
   useEffect(() => {
-    if (!query.trim() && browsePage > 1) {
+    const prev = prevBrowsePageRef.current;
+    prevBrowsePageRef.current = browsePage;
+    if (prev === browsePage) return; // skip initial mount and StrictMode re-runs
+    if (!query.trim()) {
       loadTopAnime(browsePage);
     }
   }, [browsePage]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Filter changes - debounced to prevent rapid API calls
+  // Filter changes - only fire when values actually changed (guards against StrictMode re-runs)
   useEffect(() => {
-    if (!filtersInitialized.current) {
-      filtersInitialized.current = true;
+    const prev = prevFiltersRef.current;
+    const current = { category, genreId: selectedGenreId, view: defaultView };
+    prevFiltersRef.current = current;
+
+    // Skip initial mount and StrictMode re-runs (values unchanged)
+    if (!prev || (prev.category === current.category && prev.genreId === current.genreId && prev.view === current.view)) {
       return;
     }
+
     const timeoutId = setTimeout(() => {
       if (!query.trim()) {
         loadTopAnime(1);

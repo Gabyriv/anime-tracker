@@ -105,11 +105,12 @@ async function fetchJikan(url: string, externalSignal?: AbortSignal): Promise<Ji
       return { results: [], pagination: EMPTY_PAGINATION, error: createError('invalid', ERROR_MESSAGES.invalid) };
     }
 
+    const currentPage = data.pagination?.current_page ?? 1;
     const pagination: PaginationInfo = {
-      current_page: data.pagination?.current_page ?? 1,
+      current_page: currentPage,
       last_visible_page: data.pagination?.last_visible_page ?? 1,
       has_next_page: data.pagination?.has_next_page ?? false,
-      has_prev_page: data.pagination?.has_prev_page ?? false,
+      has_prev_page: currentPage > 1,
     };
     return { results: data.data, pagination, error: null };
   } catch (error) {
@@ -156,8 +157,8 @@ export async function getSeasonalAnime(page = 1, limit = 20, type?: string, genr
   return fetchJikan(url, signal);
 }
 
-// Cache for genres - fetched once per session
-let genresCache: Genre[] | null = null;
+// Cache the in-flight promise so concurrent callers share one request
+let genresCachePromise: Promise<Genre[]> | null = null;
 
 // Fallback genres list in case API fails
 const FALLBACK_GENRES: Genre[] = [
@@ -199,38 +200,33 @@ const FALLBACK_GENRES: Genre[] = [
 ];
 
 // Get anime genres from Jikan API
-export async function getGenres(): Promise<Genre[]> {
-  // Return cached genres if already fetched
-  if (genresCache) {
-    return genresCache;
-  }
+export function getGenres(): Promise<Genre[]> {
+  if (genresCachePromise) return genresCachePromise;
 
-  try {
-    await respectRateLimit();
-
-    const response = await fetch(`${BASE_URL}/genres/anime?sfw`);
-
-    if (!response.ok) {
-      console.error('Failed to fetch genres:', response.status);
+  genresCachePromise = (async () => {
+    try {
+      await respectRateLimit();
+      const response = await fetch(`${BASE_URL}/genres/anime?sfw`);
+      if (!response.ok) {
+        console.error('Failed to fetch genres:', response.status);
+        genresCachePromise = null; // allow retry on next call
+        return FALLBACK_GENRES;
+      }
+      const data = await response.json();
+      if (!data.data || !Array.isArray(data.data)) {
+        genresCachePromise = null;
+        return FALLBACK_GENRES;
+      }
+      return data.data.map((genre: { mal_id: number; name: string }) => ({
+        mal_id: genre.mal_id,
+        name: genre.name,
+      }));
+    } catch (error) {
+      console.error('Error fetching genres:', error);
+      genresCachePromise = null;
       return FALLBACK_GENRES;
     }
+  })();
 
-    const data = await response.json();
-
-    if (!data.data || !Array.isArray(data.data)) {
-      return FALLBACK_GENRES;
-    }
-
-    // Cache the genres
-    const mapped = data.data.map((genre: { mal_id: number; name: string }) => ({
-      mal_id: genre.mal_id,
-      name: genre.name
-    }));
-    genresCache = mapped;
-
-    return mapped;
-  } catch (error) {
-    console.error('Error fetching genres:', error);
-    return FALLBACK_GENRES;
-  }
+  return genresCachePromise;
 }
