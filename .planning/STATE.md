@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 last_updated: "2026-04-12T00:17:31.000Z"
-last_activity: 2026-04-12 - Completed quick task 260411-u51: Fix Jikan API Too Many Requests 429 Errors
+last_activity: 2026-04-12 - Completed quick task 260412-g7r: Fix My List counter not decrementing after removal
 progress:
   total_phases: 8
   completed_phases: 6
@@ -116,7 +116,8 @@ Progress: [████████████████████░░░
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260411-u51 | Fix Jikan API Too Many Requests 429 Errors | 2026-04-12 | a15ca9f | [260411-u51-fix-jikan-api-too-many-requests-429-erro](./quick/260411-u51-fix-jikan-api-too-many-requests-429-erro/) |
+| 260412-g7r | Fix My List counter not decrementing after removal | 2026-04-12 | 1d53f5a | [260412-g7r-fix-my-list-counter-not-decrementing-aft](./quick/260412-g7r-fix-my-list-counter-not-decrementing-aft/) |
 
 ---
 
-*Updated: 2026-04-12 - Quick task 260411-u51 complete (Fix Jikan API 429 errors)*
+*Updated: 2026-04-12 - Quick task 260412-g7r complete (Fix My List counter not decrementing after removal)*
