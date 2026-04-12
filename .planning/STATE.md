@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 last_updated: "2026-04-12T00:17:31.000Z"
-last_activity: 2026-04-12 -- Phase 8.1 complete
+last_activity: 2026-04-12 - Completed quick task 260411-u51: Fix Jikan API Too Many Requests 429 Errors
 progress:
   total_phases: 8
   completed_phases: 6
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 Phase: 8.1 (Layout Fix + Genre Filters)
 Plan: 1/1
 Status: Complete
-Last activity: 2026-04-12 -- Phase 8.1 complete
+Last activity: 2026-04-12 - Completed quick task 260411-u51: Fix Jikan API Too Many Requests 429 Errors
 
 Progress: [████████████████████░░░░] 69% (Phase 8.1 complete)
 
@@ -111,6 +111,12 @@ Progress: [████████████████████░░░
 - Import/export list (JSON format)
 - Dark/light theme toggle
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260411-u51 | Fix Jikan API Too Many Requests 429 Errors | 2026-04-12 | a15ca9f | [260411-u51-fix-jikan-api-too-many-requests-429-erro](./quick/260411-u51-fix-jikan-api-too-many-requests-429-erro/) |
+
 ---
 
-*Updated: 2026-04-12 - Phase 8 (Search Enhancements) complete*
+*Updated: 2026-04-12 - Quick task 260411-u51 complete (Fix Jikan API 429 errors)*
