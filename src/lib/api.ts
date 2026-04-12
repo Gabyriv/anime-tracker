@@ -1,5 +1,12 @@
 import { AnimeFromApi } from '../types/anime';
 
+const VALID_TYPES = ['tv', 'movie', 'ona', 'ova', 'special', 'music'] as const;
+export type AnimeType = typeof VALID_TYPES[number];
+
+function isValidType(type: string): type is AnimeType {
+  return VALID_TYPES.includes(type as AnimeType);
+}
+
 const BASE_URL = 'https://api.jikan.moe/v4';
 const MIN_REQUEST_DELAY = 350;
 
@@ -38,14 +45,19 @@ export const ERROR_MESSAGES = {
   unknown: 'Something went wrong. Please try again.'
 } as const;
 
-export async function getTopAnime(page = 1, limit = 20): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
+export async function getTopAnime(page = 1, limit = 20, type?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
   
   try {
     await respectRateLimit();
     
-    const response = await fetch(`${BASE_URL}/top/anime?page=${page}&limit=${limit}&sfw`, {
+    let url = `${BASE_URL}/top/anime?page=${page}&limit=${limit}&sfw`;
+    if (type && isValidType(type)) {
+      url += `&type=${type}`;
+    }
+    
+    const response = await fetch(url, {
       signal: controller.signal
     });
     
@@ -88,7 +100,7 @@ export async function getTopAnime(page = 1, limit = 20): Promise<{ results: Anim
   }
 }
 
-export async function searchAnime(query: string, page = 1, limit = 20): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
+export async function searchAnime(query: string, page = 1, limit = 20, type?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
   if (!query.trim()) return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: null };
   
   const controller = new AbortController();
@@ -98,7 +110,124 @@ export async function searchAnime(query: string, page = 1, limit = 20): Promise<
     await respectRateLimit();
     
     const encodedQuery = encodeURIComponent(query);
-    const response = await fetch(`${BASE_URL}/anime?q=${encodedQuery}&page=${page}&limit=${limit}&sfw`, {
+    let url = `${BASE_URL}/anime?q=${encodedQuery}&page=${page}&limit=${limit}&sfw`;
+    if (type && isValidType(type)) {
+      url += `&type=${type}`;
+    }
+    
+    const response = await fetch(url, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (response.status === 429) {
+      return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('rate_limit', ERROR_MESSAGES.rate_limit) };
+    }
+    
+    if (!response.ok) {
+      console.error('API error:', response.status);
+      return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('network', ERROR_MESSAGES.network) };
+    }
+    
+    const data = await response.json();
+    
+    if (!data.data || !Array.isArray(data.data)) {
+      return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('invalid', ERROR_MESSAGES.invalid) };
+    }
+    
+    const pagination: PaginationInfo = {
+      current_page: data.pagination?.current_page ?? 1,
+      last_visible_page: data.pagination?.last_visible_page ?? 1,
+      has_next_page: data.pagination?.has_next_page ?? false,
+      has_prev_page: data.pagination?.has_prev_page ?? false,
+    };
+    
+    return { results: data.data, pagination, error: null };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('timeout', ERROR_MESSAGES.timeout) };
+      }
+      return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('network', ERROR_MESSAGES.network) };
+    }
+    
+    return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('unknown', ERROR_MESSAGES.unknown) };
+  }
+}
+
+// Get currently airing anime (Latest view)
+export async function getLatestAnime(page = 1, limit = 20, type?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+  
+  try {
+    await respectRateLimit();
+    
+    let url = `${BASE_URL}/anime?status=airing&order_by=start_date&sort=desc&page=${page}&limit=${limit}&sfw`;
+    if (type && isValidType(type)) {
+      url += `&type=${type}`;
+    }
+    
+    const response = await fetch(url, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (response.status === 429) {
+      return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('rate_limit', ERROR_MESSAGES.rate_limit) };
+    }
+    
+    if (!response.ok) {
+      console.error('API error:', response.status);
+      return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('network', ERROR_MESSAGES.network) };
+    }
+    
+    const data = await response.json();
+    
+    if (!data.data || !Array.isArray(data.data)) {
+      return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('invalid', ERROR_MESSAGES.invalid) };
+    }
+    
+    const pagination: PaginationInfo = {
+      current_page: data.pagination?.current_page ?? 1,
+      last_visible_page: data.pagination?.last_visible_page ?? 1,
+      has_next_page: data.pagination?.has_next_page ?? false,
+      has_prev_page: data.pagination?.has_prev_page ?? false,
+    };
+    
+    return { results: data.data, pagination, error: null };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('timeout', ERROR_MESSAGES.timeout) };
+      }
+      return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('network', ERROR_MESSAGES.network) };
+    }
+    
+    return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('unknown', ERROR_MESSAGES.unknown) };
+  }
+}
+
+// Get seasonal anime (current season)
+export async function getSeasonalAnime(page = 1, limit = 20, type?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+  
+  try {
+    await respectRateLimit();
+    
+    let url = `${BASE_URL}/seasons/now?page=${page}&limit=${limit}&sfw`;
+    if (type && isValidType(type)) {
+      url += `&type=${type}`;
+    }
+    
+    const response = await fetch(url, {
       signal: controller.signal
     });
     
