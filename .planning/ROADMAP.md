@@ -103,12 +103,12 @@ Plans:
 ### Phase 8.1: Layout Fix + Genre Filters
 **Goal:** Reposition cards left, add genre filter badges, right-side filter space
 **Depends on:** Phase 8
-**Status:** ☐ Planned (1 plan)
+**Status:** ✓ Complete (2026-04-11)
 **Requirements:** UX-07, UX-08
 **Plans:** 1 plan (4 tasks)
 
 Plans:
-- [ ] 08.1-01: Genre filters + right sidebar + left-aligned cards
+- [x] 08.1-01: Genre filters + right sidebar + left-aligned cards
 
 ---
 

@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 last_updated: "2026-04-12T00:17:31.000Z"
-last_activity: 2026-04-12 -- Phase 8 Plan 1 complete
+last_activity: 2026-04-12 -- Phase 8.1 complete
 progress:
   total_phases: 8
-  completed_phases: 5
-  total_plans: 15
-  completed_plans: 10
-  percent: 67
+  completed_phases: 6
+  total_plans: 16
+  completed_plans: 11
+  percent: 69
 ---
 
 # Project State
@@ -23,12 +23,12 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 
 ## Current Position
 
-Phase: 08 (Search Enhancements)
+Phase: 8.1 (Layout Fix + Genre Filters)
 Plan: 1/1
 Status: Complete
-Last activity: 2026-04-12 -- Phase 8 Plan 1 complete
+Last activity: 2026-04-12 -- Phase 8.1 complete
 
-Progress: [████████████████████░░░] 67% (Phase 8 complete)
+Progress: [████████████████████░░░░] 69% (Phase 8.1 complete)
 
 ## What Was Built
 
