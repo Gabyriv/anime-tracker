@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-12T00:15:00.000Z"
-last_activity: 2026-04-12 -- Phase 7 Plan 1 complete
+last_updated: "2026-04-12T00:17:31.000Z"
+last_activity: 2026-04-12 -- Phase 8 Plan 1 complete
 progress:
-  total_phases: 7
-  completed_phases: 4
-  total_plans: 14
-  completed_plans: 9
-  percent: 64
+  total_phases: 8
+  completed_phases: 5
+  total_plans: 15
+  completed_plans: 10
+  percent: 67
 ---
 
 # Project State
@@ -23,12 +23,12 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 
 ## Current Position
 
-Phase: 07 (Keyboard Shortcuts)
+Phase: 08 (Search Enhancements)
 Plan: 1/1
 Status: Complete
-Last activity: 2026-04-12 -- Phase 7 Plan 1 complete
+Last activity: 2026-04-12 -- Phase 8 Plan 1 complete
 
-Progress: [████████████████████░░░░] 57% (Phase 7 executing)
+Progress: [████████████████████░░░] 67% (Phase 8 complete)
 
 ## What Was Built
 
@@ -38,6 +38,8 @@ Progress: [████████████████████░░░
 - Pagination with separate state for browse vs search
 - Title language toggle (EN/JP/Kanji)
 - Expandable search bar in header with click-outside-to-close
+- **NEW: Category filter badges (TV, Movie, OVA, Special, ONA, Music)**
+- **NEW: Default view selector (Popular/Latest/Seasonal)**
 
 ### My List Tab
 
@@ -68,8 +70,8 @@ Progress: [████████████████████░░░
 
 **Velocity:**
 
-- Total plans completed: 15 (across 6 phases)
-- Average duration: ~5 min/plan
+- Total plans completed: 10 (across 5 phases)
+- Average duration: ~2-5 min/plan
 
 | Phase | Plans | Status |
 |------|-------|--------|
@@ -80,6 +82,7 @@ Progress: [████████████████████░░░
 | 05 | 1 | ✓ Complete |
 | 06 | 1 | ✓ Complete |
 | 07 | 1/1 | ✓ Complete |
+| 08 | 1/1 | ✓ Complete |
 
 ## Tech Stack (Current)
 
@@ -91,10 +94,10 @@ Progress: [████████████████████░░░
 
 ## Next Features (from FEATURES.md)
 
-### Search Enhancements (Future)
+### Search Enhancements (Complete)
 
-- Category Search - Filter by anime type (TV, Movie, OVA, Special, etc.)
-- Default View Options - Choose what shows on search tab with no query
+- ✓ Category Search - Filter by anime type (TV, Movie, OVA, Special, etc.)
+- ✓ Default View Options - Choose what shows on search tab with no query
 
 ### User Accounts (Future)
 
@@ -110,4 +113,4 @@ Progress: [████████████████████░░░
 
 ---
 
-*Updated: 2026-04-11 - Core features complete, ready for enhancements*
+*Updated: 2026-04-12 - Phase 8 (Search Enhancements) complete*
