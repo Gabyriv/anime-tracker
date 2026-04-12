@@ -241,11 +241,12 @@ export function SearchResults({
               const currentStatusOption = STATUS_OPTIONS.find(opt => opt.value === userStatus);
               
               return (
-                <AnimeCard 
+                <AnimeCard
                   key={anime.mal_id}
-                  anime={anime} 
+                  anime={anime}
                   onSelect={onAnimeSelect}
                   titleLanguage={titleLanguage}
+                  onGenreClick={onGenreChange ? (genreId) => { onGenreChange(genreId); } : undefined}
                   action={
                     onStatusChange && (
                       <Dropdown

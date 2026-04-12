@@ -17,6 +17,7 @@ export interface AnimeFromApi {
   score: number | null;
   status: string | null;
   year: number | null;
+  genres?: { mal_id: number; name: string }[];
 }
 
 export interface AnimeInDb {

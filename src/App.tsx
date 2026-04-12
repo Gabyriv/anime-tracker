@@ -259,6 +259,21 @@ function App() {
                   </div>
                 )}
                 
+                {/* Genre tags */}
+                {selectedAnime.genres && selectedAnime.genres.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {selectedAnime.genres.map((genre) => (
+                      <button
+                        key={genre.mal_id}
+                        onClick={() => { setGenre(genre.mal_id); setSelectedAnime(null); setViewMode('search'); }}
+                        className="text-xs px-2.5 py-1 rounded-lg bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-accent)] hover:text-white transition-colors"
+                      >
+                        {genre.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {/* Action buttons */}
                 <div className="mt-auto pt-4">
                   <StatusDropdown 
