@@ -9,70 +9,41 @@ A minimal anime list tracking application that allows users to search for anime 
 
 ### Constraints
 
-- **Database**: SQLite — simple, local, sufficient for single-user (sql.js client-side)
-- **Tech**: React 19 + Vite 8 + TailwindCSS 4 (web app, not Tauri yet)
+- **Database**: SQLite via sql.js (client-side, persisted to localStorage)
+- **Tech**: React 19 + Vite 8 + TailwindCSS 4 (web app, PWA-ready)
 - **Scope**: Keep it minimal — focus on core list management
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:research/STACK.md -->
 ## Technology Stack
 
-## Recommended Stack
 ### Core Technologies
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Tauri | 2.x | Desktop app framework | Lightweight, fast, uses system webview (10MB vs 100MB+ for Electron) |
-| React | 18.x | Frontend UI library | Most popular, large ecosystem, familiar patterns |
-| TypeScript | 5.x | Type safety | Catches bugs early, better IDE support |
-| SQLite | 3.x | Local database | User-specified, sufficient for single-user |
-### Supporting Libraries
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| Jikan API | v4 | Anime search | Free, no auth needed, scrapes MyAnimeList |
-| Drizzle ORM | latest | Type-safe DB queries | TypeScript-first, works well with Tauri |
-| @tauri-apps/plugin-sql | 2.x | SQLite in Tauri | Official Tauri SQL plugin |
-| TailwindCSS | 3.x | Styling | Fast development, small bundle |
+| Technology | Version | Purpose | Status |
+|------------|---------|---------|--------|
+| React | 19.x | Frontend UI library | ✅ Implemented |
+| Vite | 8.x | Build tool | ✅ Implemented |
+| TailwindCSS | 4.x | Styling | ✅ Implemented |
+| TypeScript | 5.x | Type safety | ✅ Implemented |
+| sql.js | 1.x | SQLite in browser | ✅ Implemented |
+| Jikan API | v4 | Anime search (MyAnimeList) | ✅ Implemented |
+
 ### Development Tools
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| pnpm | Package manager | Faster, better monorepo support |
-| Vite | Build tool | Fast dev server, optimized builds |
-## Installation
-# Create Tauri app
-# Core dependencies
-# Database
-# Styling
-# API
-# No additional packages needed - use fetch() for Jikan API
-## Alternatives Considered
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|------------------------|
-| Tauri 2.x | Electron | Need Node.js ecosystem, complex desktop integrations |
-| React | Vue/Svelte | Team expertise, simpler state management |
-| Jikan API | AniList API | User prefers AniList data |
-| Drizzle | raw sqlx | Need more control, simpler project |
-## What NOT to Use
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| Electron | ~100MB app size, 200-300MB memory | Tauri (10MB, 30-40MB) |
-| SQLite browser (sql.js) | No persistence across sessions | @tauri-apps/plugin-sql |
-| Official MAL API | Requires auth, limited | Jikan (free, no auth) |
-## Stack Patterns by Variant
-- Use Tauri 2.x with React
-- @tauri-apps/plugin-sql for SQLite
-- Use Vite + React
-- sql.js for SQLite (in-browser, limited)
-- Or skip SQLite, use localStorage
-## Version Compatibility
-| Package | Compatible With | Notes |
-|---------|-----------------|-------|
-| Tauri 2.x | React 18.x | Works well |
-| Drizzle | @tauri-apps/plugin-sql | Use drizzle-kit for migrations |
-| TailwindCSS 3.x | Vite 5.x | Works well |
-## Sources
-- Jikan API docs — https://docs.jikan.moe/ (free anime data)
-- Tauri 2.0 docs — https://tauri.app/ (desktop framework)
-- Drizzle ORM docs — https://orm.drizzle.team/ (TypeScript ORM)
+| Tool | Purpose |
+|------|---------|
+| pnpm | Package manager |
+| Vite | Dev server + build |
+
+### API
+- **Jikan API v4** (https://api.jikan.moe/v4) — free, no auth, scrapes MyAnimeList
+- Rate limiting: 350ms debounce on search, 429 backoff on rate limit errors
+
+### Data Persistence
+- **sql.js** (SQLite compiled to WebAssembly) — client-side database
+- **localStorage** — persists the SQL database as base64-encoded blob via `saveDb()` function
+
+### Sources
+- Jikan API docs — https://docs.jikan.moe/
+- sql.js docs — https://sql.js.org/
 <!-- GSD:stack-end -->
 
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
@@ -113,7 +84,7 @@ A minimal anime list tracking application that allows users to search for anime 
 ```
 src/
 ├── components/
-│   ├── ui/           # shadcn-style components (Dialog, Dropdown)
+│   ├── ui/           # shadcn-style components (Dialog, Dropdown, Skeleton, Toast)
 │   ├── AnimeCard.tsx
 │   ├── SearchBar.tsx
 │   ├── SearchResults.tsx
@@ -121,33 +92,45 @@ src/
 │   ├── UserListCard.tsx
 │   ├── StatusFilter.tsx
 │   ├── StatusDropdown.tsx
+│   ├── SearchHeader.tsx
 │   └── Pagination.tsx
 ├── hooks/
 │   ├── useAnimeList.ts
-│   └── useSearch.ts
+│   ├── useSearch.ts
+│   ├── useTitleLanguageToggle.ts
+│   └── useKeyboardShortcuts.ts
+├── context/
+│   └── ToastContext.tsx
 ├── lib/
-│   ├── api.ts        # Jikan API integration
-│   └── db.ts        # SQLite with sql.js
-└── types/
-    └── anime.ts
+│   ├── api.ts        # Jikan API v4 integration with rate limiting
+│   └── db.ts        # SQLite with sql.js + localStorage persistence
+├── types/
+│   └── anime.ts
+└── App.tsx
 ```
 
 ### Data Flow
-1. Search: useSearch hook → Jikan API → SearchResults → AnimeCard
-2. List: useAnimeList hook → SQLite → UserList → UserListCard
-3. Add to list: StatusDropdown → addToList → SQLite
-4. Pagination: Pagination component ↔ useSearch → API → Results
+1. Search: SearchHeader → useSearch → Jikan API → SearchResults → AnimeCard
+2. List: App (lifted state) → useAnimeList → SQLite → UserList → UserListCard
+3. Add to list: StatusDropdown → addToList → SQLite (via useAnimeList)
+4. Pagination: Pagination component ↔ useSearch (separate browsePage/searchPage) → API → Results
 
 ### Current Features Implemented
-- Search anime via Jikan API v4
-- View top/popular anime on initial load
-- Pagination (20 per page, page numbers + prev/next)
+- Search anime via Jikan API v4 with rate limiting (350ms debounce, 429 backoff)
+- Browse mode: top/popular, latest, seasonal views with pagination
+- Search mode: full-text search with pagination
+- Category filter (TV, Movie, OVA, Special, ONA, Music)
+- Genre filter (clickable in sidebar and on cards)
+- Title language toggle (English / Japanese / Kanji)
 - Add anime to list with status (watching, completed, plan_to_watch, on_hold, dropped)
 - Episode progress tracking
+- Personal ratings and notes
 - Remove from list
 - Filter list by status
 - View anime details in modal
-- Rate limiting (350ms between API requests)
+- Toast notifications for all actions
+- Skeleton loading states
+- Keyboard shortcuts (Esc to close modal, / to focus search)
 <!-- GSD:architecture-end -->
 
 <!-- GSD:skills-start source:skills/ -->
@@ -182,20 +165,17 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 ## Feature Roadmap
 
 ### Phase 1: Search Enhancements
-- [x] **Category Search** - (partially - pagination works)
+- [x] **Category Search** - (TV, Movie, OVA, Special, ONA, Music)
 - [x] **Title Language Toggle** - EN/JP/漢 toggle with romanized + kanji support
-- [ ] **Default View Options** - Choose what shows on search tab with no query:
-  - Latest anime (currently airing/recent)
-  - Popular anime (top rated) - *currently implemented*
-  - Seasonal anime
-  - Category filters (Action, Comedy, Drama, etc.)
+- [x] **Default View Options** - Popular, Latest, Seasonal views with category filters
+- [x] **Genre Filter** - Clickable genre tags in sidebar and on cards
 
 ### Phase 2: UI/UX Improvements
 - [x] Enhanced anime cards with more info on hover
 - [x] Improved modal animations
 - [x] Skeleton loading states
 - [x] Toast notifications for actions (added to list, status changed, etc.)
-- [ ] Keyboard shortcuts (e.g., Esc to close modal, / to focus search)
+- [x] Keyboard shortcuts (Esc to close modal, / to focus search)
 
 ### Phase 3: User Accounts (Future)
 - [ ] Authentication via Clerk or WorkOS
@@ -203,9 +183,9 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 - [ ] Multi-device access
 - [ ] User preferences storage
 
-### Implemented Features (2026-04-11)
+### Implemented Features (2026-04-12)
 - ✅ Search with Jikan API v4
-- ✅ Pagination (browse vs search separate state)
+- ✅ Pagination (browse vs search separate state, both working)
 - ✅ Title language toggle (EN/JP/漢)
 - ✅ Expandable search in header
 - ✅ Click-outside to close search
@@ -215,6 +195,9 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 - ✅ Status filtering in My List
 - ✅ Toast notifications
 - ✅ Skeleton loading states
+- ✅ Mobile responsive design with filter panel
+- ✅ Clickable genre tags on cards and in modal
+- ✅ Rate limiting with 429 backoff
 
 ### Suggested Additions
 - [ ] Anime recommendations based on list
@@ -225,4 +208,5 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 - [ ] Dark/light theme toggle (currently dark only)
 - [ ] Continue watching section
 - [ ] Season/sequel detection and linking
+- [ ] Performance improvements to reduce 429 errors
 <!-- GSD:features-end -->
