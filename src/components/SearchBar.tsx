@@ -9,27 +9,7 @@ interface SearchBarProps {
   error?: string | null;
   titleLanguage?: TitleLanguage;
   onTitleLanguageToggle?: () => void;
-  category?: string;
-  onCategoryChange?: (category: string) => void;
-  defaultView?: DefaultView;
-  onDefaultViewChange?: (view: DefaultView) => void;
 }
-
-const CATEGORIES = [
-  { value: '', label: 'All' },
-  { value: 'tv', label: 'TV' },
-  { value: 'movie', label: 'Movie' },
-  { value: 'ova', label: 'OVA' },
-  { value: 'special', label: 'Special' },
-  { value: 'ona', label: 'ONA' },
-  { value: 'music', label: 'Music' },
-];
-
-const DEFAULT_VIEWS: { value: DefaultView; label: string }[] = [
-  { value: 'popular', label: 'Popular' },
-  { value: 'latest', label: 'Latest' },
-  { value: 'seasonal', label: 'Seasonal' },
-];
 
 export function SearchBar({ 
   query, 
@@ -37,11 +17,7 @@ export function SearchBar({
   loading, 
   error, 
   titleLanguage = 'english', 
-  onTitleLanguageToggle,
-  category = '',
-  onCategoryChange,
-  defaultView = 'popular',
-  onDefaultViewChange
+  onTitleLanguageToggle
 }: SearchBarProps) {
   const isJapanese = titleLanguage === 'japanese' || titleLanguage === 'kanji';
   
@@ -87,45 +63,6 @@ export function SearchBar({
             <div className="w-5 h-5 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin"></div>
           )}
         </div>
-      </div>
-      
-      {/* Filter Row: Category badges and Default View selector */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        {/* Category Filter Badges */}
-        <div className="flex flex-wrap gap-1.5">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => onCategoryChange?.(cat.value)}
-              className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all duration-200 ${
-                category === cat.value
-                  ? 'bg-[var(--color-accent)] text-white shadow-[0_0_12px_rgba(94,106,210,0.4)]'
-                  : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)]'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-        
-        {/* Default View Selector */}
-        {onDefaultViewChange && (
-          <div className="flex items-center gap-1 bg-[var(--color-surface)] rounded-lg p-1 border border-[var(--color-border)]">
-            {DEFAULT_VIEWS.map((view) => (
-              <button
-                key={view.value}
-                onClick={() => onDefaultViewChange(view.value)}
-                className={`text-xs px-2.5 py-1 rounded-md font-medium transition-all duration-200 ${
-                  defaultView === view.value
-                    ? 'bg-[var(--color-accent)] text-white'
-                    : 'text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)]'
-                }`}
-              >
-                {view.label}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
       
       {error && (

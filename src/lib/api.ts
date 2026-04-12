@@ -3,6 +3,11 @@ import { AnimeFromApi } from '../types/anime';
 const VALID_TYPES = ['tv', 'movie', 'ona', 'ova', 'special', 'music'] as const;
 export type AnimeType = typeof VALID_TYPES[number];
 
+export interface Genre {
+  mal_id: number;
+  name: string;
+}
+
 function isValidType(type: string): type is AnimeType {
   return VALID_TYPES.includes(type as AnimeType);
 }
@@ -45,7 +50,7 @@ export const ERROR_MESSAGES = {
   unknown: 'Something went wrong. Please try again.'
 } as const;
 
-export async function getTopAnime(page = 1, limit = 20, type?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
+export async function getTopAnime(page = 1, limit = 20, type?: string, genre?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
   
@@ -55,6 +60,9 @@ export async function getTopAnime(page = 1, limit = 20, type?: string): Promise<
     let url = `${BASE_URL}/top/anime?page=${page}&limit=${limit}&sfw`;
     if (type && isValidType(type)) {
       url += `&type=${type}`;
+    }
+    if (genre) {
+      url += `&genres=${genre}`;
     }
     
     const response = await fetch(url, {
@@ -100,7 +108,7 @@ export async function getTopAnime(page = 1, limit = 20, type?: string): Promise<
   }
 }
 
-export async function searchAnime(query: string, page = 1, limit = 20, type?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
+export async function searchAnime(query: string, page = 1, limit = 20, type?: string, genre?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
   if (!query.trim()) return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: null };
   
   const controller = new AbortController();
@@ -113,6 +121,9 @@ export async function searchAnime(query: string, page = 1, limit = 20, type?: st
     let url = `${BASE_URL}/anime?q=${encodedQuery}&page=${page}&limit=${limit}&sfw`;
     if (type && isValidType(type)) {
       url += `&type=${type}`;
+    }
+    if (genre) {
+      url += `&genres=${genre}`;
     }
     
     const response = await fetch(url, {
@@ -159,7 +170,7 @@ export async function searchAnime(query: string, page = 1, limit = 20, type?: st
 }
 
 // Get currently airing anime (Latest view)
-export async function getLatestAnime(page = 1, limit = 20, type?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
+export async function getLatestAnime(page = 1, limit = 20, type?: string, genre?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
   
@@ -169,6 +180,9 @@ export async function getLatestAnime(page = 1, limit = 20, type?: string): Promi
     let url = `${BASE_URL}/anime?status=airing&order_by=start_date&sort=desc&page=${page}&limit=${limit}&sfw`;
     if (type && isValidType(type)) {
       url += `&type=${type}`;
+    }
+    if (genre) {
+      url += `&genres=${genre}`;
     }
     
     const response = await fetch(url, {
@@ -215,7 +229,7 @@ export async function getLatestAnime(page = 1, limit = 20, type?: string): Promi
 }
 
 // Get seasonal anime (current season)
-export async function getSeasonalAnime(page = 1, limit = 20, type?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
+export async function getSeasonalAnime(page = 1, limit = 20, type?: string, genre?: string): Promise<{ results: AnimeFromApi[]; pagination: PaginationInfo; error: SearchError | null }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
   
@@ -225,6 +239,9 @@ export async function getSeasonalAnime(page = 1, limit = 20, type?: string): Pro
     let url = `${BASE_URL}/seasons/now?page=${page}&limit=${limit}&sfw`;
     if (type && isValidType(type)) {
       url += `&type=${type}`;
+    }
+    if (genre) {
+      url += `&genres=${genre}`;
     }
     
     const response = await fetch(url, {
@@ -267,5 +284,72 @@ export async function getSeasonalAnime(page = 1, limit = 20, type?: string): Pro
     }
     
     return { results: [], pagination: { current_page: 1, last_visible_page: 1, has_next_page: false, has_prev_page: false }, error: createError('unknown', ERROR_MESSAGES.unknown) };
+  }
+}
+
+// Fallback genres list in case API fails
+const FALLBACK_GENRES: Genre[] = [
+  { mal_id: 1, name: 'Action' },
+  { mal_id: 2, name: 'Adventure' },
+  { mal_id: 4, name: 'Comedy' },
+  { mal_id: 8, name: 'Drama' },
+  { mal_id: 10, name: 'Fantasy' },
+  { mal_id: 22, name: 'Romance' },
+  { mal_id: 24, name: 'Sci-Fi' },
+  { mal_id: 7, name: 'Mystery' },
+  { mal_id: 30, name: 'Sports' },
+  { mal_id: 37, name: 'Supernatural' },
+  { mal_id: 36, name: 'Slice of Life' },
+  { mal_id: 9, name: 'Ecchi' },
+  { mal_id: 15, name: 'Kids' },
+  { mal_id: 18, name: 'Mecha' },
+  { mal_id: 21, name: 'Music' },
+  { mal_id: 23, name: 'School' },
+  { mal_id: 25, name: 'Thriller' },
+  { mal_id: 41, name: 'Suspense' },
+  { mal_id: 29, name: 'Horror' },
+  { mal_id: 3, name: 'Award Winning' },
+  { mal_id: 38, name: 'Strategy Game' },
+  { mal_id: 13, name: 'Historical' },
+  { mal_id: 40, name: 'Psychological' },
+  { mal_id: 35, name: 'Shoujo' },
+  { mal_id: 27, name: 'Shounen' },
+  { mal_id: 28, name: 'Space' },
+  { mal_id: 33, name: 'Gourmet' },
+  { mal_id: 32, name: 'Girls Love' },
+  { mal_id: 26, name: 'Boys Love' },
+  { mal_id: 31, name: 'Superhero' },
+  { mal_id: 42, name: 'Workplace' },
+  { mal_id: 43, name: 'Performer' },
+  { mal_id: 44, name: 'Documentary' },
+  { mal_id: 39, name: 'Magical Sexy' },
+  { mal_id: 46, name: 'Erotica' }
+];
+
+// Get anime genres from Jikan API
+export async function getGenres(): Promise<Genre[]> {
+  try {
+    await respectRateLimit();
+    
+    const response = await fetch(`${BASE_URL}/genres/anime?sfw`);
+    
+    if (!response.ok) {
+      console.error('Failed to fetch genres:', response.status);
+      return FALLBACK_GENRES;
+    }
+    
+    const data = await response.json();
+    
+    if (!data.data || !Array.isArray(data.data)) {
+      return FALLBACK_GENRES;
+    }
+    
+    return data.data.map((genre: { mal_id: number; name: string }) => ({
+      mal_id: genre.mal_id,
+      name: genre.name
+    }));
+  } catch (error) {
+    console.error('Error fetching genres:', error);
+    return FALLBACK_GENRES;
   }
 }

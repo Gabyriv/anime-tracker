@@ -25,7 +25,7 @@ function App() {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const toastFnRef = useRef<((msg: string, type?: string, status?: string) => void) | null>(null);
   
-  const { query, setQuery, results, loading, error: searchError, page, setPage, pagination, category, setCategory, defaultView, setDefaultView } = useSearch();
+  const { query, setQuery, results, loading, error: searchError, page, setPage, pagination, category, setCategory, defaultView, setDefaultView, genres, selectedGenreId, setGenre } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
   const { titleLanguage, toggle: toggleTitleLanguage } = useTitleLanguageToggle();
 
@@ -145,10 +145,6 @@ function App() {
                 error={searchError}
                 titleLanguage={titleLanguage}
                 onTitleLanguageToggle={toggleTitleLanguage}
-                category={category}
-                onCategoryChange={setCategory}
-                defaultView={defaultView}
-                onDefaultViewChange={setDefaultView}
               />
             </div>
             <SearchResults 
@@ -163,6 +159,13 @@ function App() {
               isInList={isInList}
               getUserStatus={getUserStatus}
               titleLanguage={titleLanguage}
+              genres={genres}
+              selectedGenreId={selectedGenreId}
+              onGenreChange={setGenre}
+              category={category}
+              onCategoryChange={setCategory}
+              defaultView={defaultView}
+              onDefaultViewChange={setDefaultView}
             />
             
             {loading && (
