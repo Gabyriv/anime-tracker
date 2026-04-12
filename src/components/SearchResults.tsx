@@ -92,7 +92,8 @@ export function SearchResults({
     onCategoryChange?.('');
   };
   
-  const hasActiveFilters = selectedGenreId || category;
+  const activeFilterCount = (selectedGenreId ? 1 : 0) + (category ? 1 : 0);
+  const hasActiveFilters = activeFilterCount > 0;
   
   if (!query.trim() && results.length === 0 && !loading) {
     return (
@@ -143,19 +144,18 @@ export function SearchResults({
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
-          Filters
-          {hasActiveFilters && (
-            <span className="w-2 h-2 bg-[var(--color-accent)] rounded-full"></span>
-          )}
+          {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
         </button>
         
         {/* Mobile Filter Panel */}
         {showMobileFilters && (
-          <div className="mt-3 p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
+          <>
+            <div className="fixed inset-0 bg-black/30 z-40" onClick={() => setShowMobileFilters(false)} />
+            <div className="relative z-50 mt-3 p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] max-h-[70vh] overflow-y-auto">
             {/* Genres */}
-            <div className="mb-4">
+            <div className="mb-4 border-b border-[var(--color-border)] pb-3">
               <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">Genres</h4>
-              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+              <div className="flex flex-wrap gap-1.5">
                 {genres.map((genre) => (
                   <button
                     key={genre.mal_id}
@@ -174,7 +174,7 @@ export function SearchResults({
             
             {/* Category */}
             {onCategoryChange && (
-              <div className="mb-4">
+              <div className="mb-4 border-b border-[var(--color-border)] pb-3">
                 <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">Type</h4>
                 <div className="flex flex-wrap gap-1.5">
                   {CATEGORIES.map((cat) => (
@@ -225,10 +225,11 @@ export function SearchResults({
                 Clear Filters
               </button>
             )}
-          </div>
+            </div>
+          </>
         )}
       </div>
-      
+
       {/* Main Layout: Results + Right Panel */}
       <div className="flex gap-6">
         {/* Results Grid - Left Aligned */}
