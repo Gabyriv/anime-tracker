@@ -94,12 +94,21 @@ Plans:
 ### Phase 8: Search Enhancements
 **Goal:** Add category/type filters and default view options for search tab
 **Depends on:** Phase 7
-**Status:** ☐ Pending
-**Requirements:** SECH-05, SECH-06
+**Status:** ✓ Complete (2026-04-11)
 **Plans:** 1 plan
 
 Plans:
-- [ ] 08-01: Category filters + default view options
+- [x] 08-01: Category filters + default view options
+
+### Phase 8.1: Layout Fix + Genre Filters
+**Goal:** Reposition cards left, add genre filter badges, right-side filter space
+**Depends on:** Phase 8
+**Status:** ☐ Planned (1 plan)
+**Requirements:** UX-07, UX-08
+**Plans:** 1 plan (4 tasks)
+
+Plans:
+- [ ] 08.1-01: Genre filters + right sidebar + left-aligned cards
 
 ---
 
