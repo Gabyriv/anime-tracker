@@ -67,6 +67,7 @@ export function useSearch(): UseSearchResult {
   const abortControllerRef = useRef<AbortController | null>(null);
   const browseAbortControllerRef = useRef<AbortController | null>(null);
   const queryRef = useRef(query);
+  const prevQueryRef = useRef('');
   const categoryRef = useRef(category);
   const defaultViewRef = useRef(defaultView);
   const genreRef = useRef(selectedGenreId);
@@ -192,6 +193,14 @@ export function useSearch(): UseSearchResult {
 
     return () => clearTimeout(timeoutId);
   }, [query]); // Only query triggers search - filters have separate effect
+
+  // Return to browse view when search is cleared
+  useEffect(() => {
+    if (!query.trim() && prevQueryRef.current.trim()) {
+      loadTopAnime(1);
+    }
+    prevQueryRef.current = query;
+  }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Page changes for browse mode — only fires when page actually changes
   useEffect(() => {
