@@ -6,18 +6,23 @@ interface SearchHeaderProps {
   loading?: boolean;
   titleLanguage: 'english' | 'japanese' | 'kanji';
   onLanguageToggle: () => void;
+  expanded?: boolean;
+  setExpanded?: (expanded: boolean) => void;
 }
 
-export function SearchHeader({ query, setQuery, loading, titleLanguage, onLanguageToggle }: SearchHeaderProps) {
-  const [expanded, setExpanded] = useState(false);
+export function SearchHeader({ query, setQuery, loading, titleLanguage, onLanguageToggle, expanded: controlledExpanded, setExpanded: controlledSetExpanded }: SearchHeaderProps) {
+  const [internalExpanded, setInternalExpanded] = useState(false);
+  const expanded = controlledExpanded !== undefined ? controlledExpanded : internalExpanded;
+  const setExpanded = controlledSetExpanded || setInternalExpanded;
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Focus input when expanded becomes true
   useEffect(() => {
     if (expanded && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [expanded]);
+  }, [expanded, controlledExpanded]);
 
   // Click outside to close
   useEffect(() => {

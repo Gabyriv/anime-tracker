@@ -40,6 +40,11 @@
 - **LST2-01**: User can sort list by title, date added, or score
 - **LST2-02**: User can search within their list
 
+### UI/UX Improvements
+
+- **UX-05**: User can press Escape to close any open modal/dialog
+- **UX-06**: User can press / to focus the search input
+
 ## Out of Scope
 
 | Feature | Reason |

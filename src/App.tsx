@@ -3,6 +3,7 @@ import { initDb } from './lib/db';
 import { useSearch } from './hooks/useSearch';
 import { useAnimeList } from './hooks/useAnimeList';
 import { useTitleLanguageToggle } from './hooks/useTitleLanguageToggle';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { SearchHeader } from './components/SearchHeader';
 import { SearchResults } from './components/SearchResults';
 import { UserList } from './components/UserList';
@@ -20,11 +21,18 @@ function App() {
   const [selectedAnime, setSelectedAnime] = useState<AnimeFromApi | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('search');
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
   const toastFnRef = useRef<((msg: string, type?: string, status?: string) => void) | null>(null);
   
   const { query, setQuery, results, loading, error: searchError, page, setPage, pagination } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
   const { titleLanguage, toggle: toggleTitleLanguage } = useTitleLanguageToggle();
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onEscape: () => setSelectedAnime(null),
+    onSlash: () => setSearchExpanded(true),
+  });
 
   // Status labels for toast formatting
   const statusLabels: Record<string, string> = {
@@ -96,6 +104,8 @@ function App() {
                 loading={loading}
                 titleLanguage={titleLanguage}
                 onLanguageToggle={toggleTitleLanguage}
+                expanded={searchExpanded}
+                setExpanded={setSearchExpanded}
               />
               <div className="flex gap-3">
                 <button
