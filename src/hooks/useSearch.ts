@@ -37,17 +37,17 @@ export function useSearch(): UseSearchResult {
     has_next_page: false,
     has_prev_page: false,
   });
-  
+
   // Category filter state (session-only, no localStorage)
   const [category, setCategory] = useState('');
-  
+
   // Default view state (session-only, no localStorage)
   const [defaultView, setDefaultView] = useState<DefaultView>('popular');
-  
+
   // Genre filter state
   const [genres, setGenres] = useState<Genre[]>([]);
   const [selectedGenreId, setSelectedGenreId] = useState<number | null>(null);
-  
+
   // Load genres on mount
   useEffect(() => {
     async function loadGenres() {
@@ -56,51 +56,62 @@ export function useSearch(): UseSearchResult {
     }
     loadGenres();
   }, []);
-  
+
   // Determine if we're in browse mode (empty query) or search mode
   const isBrowseMode = query.trim() === '';
-  
+
   // Use the appropriate page based on mode
   const page = isBrowseMode ? browsePage : searchPage;
   const setPage = isBrowseMode ? setBrowsePage : setSearchPage;
-  
+
   const abortControllerRef = useRef<AbortController | null>(null);
+  const browseAbortControllerRef = useRef<AbortController | null>(null);
   const queryRef = useRef(query);
-  const pageRef = useRef(page);
   const categoryRef = useRef(category);
   const defaultViewRef = useRef(defaultView);
   const genreRef = useRef(selectedGenreId);
+  const browsePageRef = useRef(browsePage);
+  const searchPageRef = useRef(searchPage);
+  const filtersInitialized = useRef(false);
+
   queryRef.current = query;
-  pageRef.current = page;
   categoryRef.current = category;
   defaultViewRef.current = defaultView;
   genreRef.current = selectedGenreId;
-  
+  browsePageRef.current = browsePage;
+  searchPageRef.current = searchPage;
+
   const setGenre = useCallback((genreId: number | null) => {
     setSelectedGenreId(genreId);
   }, []);
-  
+
+  // Use refs for loadTopAnime to avoid dependency issues
   const loadTopAnime = useCallback(async (pageNum?: number) => {
-    const targetPage = pageNum ?? browsePage;
+    const targetPage = pageNum ?? browsePageRef.current;
+
+    if (browseAbortControllerRef.current) {
+      browseAbortControllerRef.current.abort();
+    }
+    browseAbortControllerRef.current = new AbortController();
+    const signal = browseAbortControllerRef.current.signal;
+
     setLoading(true);
     setError(null);
-    
-    const currentCategory = categoryRef.current;
-    const currentView = defaultViewRef.current;
-    const currentGenre = genreRef.current;
-    
+
     try {
       let results, pagination, searchError;
-      
+      const currentCategory = categoryRef.current;
+      const currentView = defaultViewRef.current;
+      const currentGenre = genreRef.current;
+
       if (currentView === 'latest') {
-        ({ results, pagination, error: searchError } = await getLatestAnime(targetPage, 20, currentCategory || undefined, currentGenre ? String(currentGenre) : undefined));
+        ({ results, pagination, error: searchError } = await getLatestAnime(targetPage, 20, currentCategory || undefined, currentGenre ? String(currentGenre) : undefined, signal));
       } else if (currentView === 'seasonal') {
-        ({ results, pagination, error: searchError } = await getSeasonalAnime(targetPage, 20, currentCategory || undefined, currentGenre ? String(currentGenre) : undefined));
+        ({ results, pagination, error: searchError } = await getSeasonalAnime(targetPage, 20, currentCategory || undefined, currentGenre ? String(currentGenre) : undefined, signal));
       } else {
-        // Default: popular
-        ({ results, pagination, error: searchError } = await getTopAnime(targetPage, 20, currentCategory || undefined, currentGenre ? String(currentGenre) : undefined));
+        ({ results, pagination, error: searchError } = await getTopAnime(targetPage, 20, currentCategory || undefined, currentGenre ? String(currentGenre) : undefined, signal));
       }
-      
+
       if (searchError) {
         setError(searchError.message);
       } else {
@@ -113,34 +124,44 @@ export function useSearch(): UseSearchResult {
     } finally {
       setLoading(false);
     }
-  }, [browsePage]);
-  
+  }, []); // No deps - uses refs
+
+  // Initial load only
   useEffect(() => {
     loadTopAnime(1);
-  }, []); // Only run on mount
-  
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Search debounce - only for actual search queries, NOT for filter changes
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
       const currentQuery = queryRef.current;
       const currentCategory = categoryRef.current;
       const currentGenre = genreRef.current;
-      
+      const currentSearchPage = searchPageRef.current;
+
+      // Only search when there's an actual query - filters are handled by filter changes effect
       if (!currentQuery.trim()) {
-        await loadTopAnime(browsePage);
         return;
       }
-      
+
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-      
+
       abortControllerRef.current = new AbortController();
       setLoading(true);
       setError(null);
-      
+
       try {
-        const { results: data, pagination: pag, error: searchError } = await searchAnime(currentQuery, searchPage, 20, currentCategory || undefined, currentGenre ? String(currentGenre) : undefined);
-        
+        const { results: data, pagination: pag, error: searchError } = await searchAnime(
+          currentQuery,
+          currentSearchPage,
+          20,
+          currentCategory || undefined,
+          currentGenre ? String(currentGenre) : undefined,
+          abortControllerRef.current.signal
+        );
+
         if (queryRef.current === currentQuery) {
           if (searchError) {
             setError(searchError.message);
@@ -148,7 +169,7 @@ export function useSearch(): UseSearchResult {
           } else {
             setResults(data);
             setPagination(pag);
-            setSearchPage(searchPage);
+            setSearchPage(currentSearchPage);
             setError(null);
           }
         }
@@ -162,20 +183,41 @@ export function useSearch(): UseSearchResult {
         }
       }
     }, 500);
-    
-    return () => clearTimeout(timeoutId);
-  }, [query, browsePage, searchPage, category, selectedGenreId, loadTopAnime]);
 
-  return { 
-    query, 
-    setQuery, 
-    results, 
-    loading, 
-    error, 
-    page, 
-    setPage, 
-    pagination, 
-    loadTopAnime, 
+    return () => clearTimeout(timeoutId);
+  }, [query]); // Only query triggers search - filters have separate effect
+
+  // Page changes for browse mode
+  useEffect(() => {
+    if (!query.trim() && browsePage > 1) {
+      loadTopAnime(browsePage);
+    }
+  }, [browsePage]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Filter changes - debounced to prevent rapid API calls
+  useEffect(() => {
+    if (!filtersInitialized.current) {
+      filtersInitialized.current = true;
+      return;
+    }
+    const timeoutId = setTimeout(() => {
+      if (!query.trim()) {
+        loadTopAnime(1);
+      }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [category, selectedGenreId, defaultView]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return {
+    query,
+    setQuery,
+    results,
+    loading,
+    error,
+    page,
+    setPage,
+    pagination,
+    loadTopAnime,
     isBrowseMode,
     category,
     setCategory,
