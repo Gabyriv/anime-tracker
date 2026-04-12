@@ -197,12 +197,18 @@ export function useSearch(): UseSearchResult {
   // Return to browse view when search is cleared
   useEffect(() => {
     if (!query.trim() && prevQueryRef.current.trim()) {
+      prevBrowsePageRef.current = 1;
       loadTopAnime(1);
     }
     prevQueryRef.current = query;
   }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Page changes for browse mode — only fires when page actually changes
+  // Page changes in browse mode — trigger data fetch when browsePage changes
+  useEffect(() => {
+    if (browsePage === 1 && prevBrowsePageRef.current === 1) return;
+    prevBrowsePageRef.current = browsePage;
+    loadTopAnime(browsePage);
+  }, [browsePage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter changes - only fire when values actually changed (guards against StrictMode re-runs)
   useEffect(() => {
@@ -217,6 +223,8 @@ export function useSearch(): UseSearchResult {
 
     const timeoutId = setTimeout(() => {
       if (!query.trim()) {
+        prevBrowsePageRef.current = 1;
+        setBrowsePage(1);
         loadTopAnime(1);
       }
     }, 300);

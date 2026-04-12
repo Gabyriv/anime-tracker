@@ -2,3 +2,10 @@
 /dist/
 .DS_Store
 .worktrees/
+.claude/
+.planning/
+.playwright-cli/
+.playwright/
+THINGS-TO-FIX.md
+fzf
+*.wasm
