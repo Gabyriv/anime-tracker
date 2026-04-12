@@ -5,6 +5,7 @@ import { useAnimeList } from './hooks/useAnimeList';
 import { useTitleLanguageToggle } from './hooks/useTitleLanguageToggle';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { SearchHeader } from './components/SearchHeader';
+import { SearchBar } from './components/SearchBar';
 import { SearchResults } from './components/SearchResults';
 import { UserList } from './components/UserList';
 import { StatusDropdown } from './components/StatusDropdown';
@@ -24,7 +25,7 @@ function App() {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const toastFnRef = useRef<((msg: string, type?: string, status?: string) => void) | null>(null);
   
-  const { query, setQuery, results, loading, error: searchError, page, setPage, pagination } = useSearch();
+  const { query, setQuery, results, loading, error: searchError, page, setPage, pagination, category, setCategory, defaultView, setDefaultView } = useSearch();
   const { list, addToList, updateStatus } = useAnimeList();
   const { titleLanguage, toggle: toggleTitleLanguage } = useTitleLanguageToggle();
 
@@ -136,6 +137,20 @@ function App() {
       <main className="container mx-auto px-4 py-6">
         {viewMode === 'search' && (
           <>
+            <div className="mb-6">
+              <SearchBar 
+                query={query}
+                setQuery={setQuery}
+                loading={loading}
+                error={searchError}
+                titleLanguage={titleLanguage}
+                onTitleLanguageToggle={toggleTitleLanguage}
+                category={category}
+                onCategoryChange={setCategory}
+                defaultView={defaultView}
+                onDefaultViewChange={setDefaultView}
+              />
+            </div>
             <SearchResults 
               query={query}
               results={results}
