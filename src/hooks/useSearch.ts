@@ -67,6 +67,7 @@ export function useSearch(): UseSearchResult {
   const abortControllerRef = useRef<AbortController | null>(null);
   const browseAbortControllerRef = useRef<AbortController | null>(null);
   const queryRef = useRef(query);
+  const prevQueryRef = useRef('');
   const categoryRef = useRef(category);
   const defaultViewRef = useRef(defaultView);
   const genreRef = useRef(selectedGenreId);
@@ -193,14 +194,15 @@ export function useSearch(): UseSearchResult {
     return () => clearTimeout(timeoutId);
   }, [query, selectedGenreId, category, page]); // Re-run when filters change during search mode
 
-  // Query changes - handle search vs browse transitions
+  // Return to browse view when search is cleared
   useEffect(() => {
-    // When query goes from something to empty, return to browse mode
-    if (!query.trim() && queryRef.current.trim()) {
-      // Query was cleared - reload browse data
+    if (!query.trim() && prevQueryRef.current.trim()) {
       loadTopAnime(1);
     }
+    prevQueryRef.current = query;
   }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Page changes for browse mode — only fires when page actually changes
 
   // Filter changes - only fire when values actually changed (guards against StrictMode re-runs)
   useEffect(() => {

@@ -69,7 +69,7 @@ export function SearchHeader({ query, setQuery, loading, titleLanguage, onLangua
       </button>
 
       {/* Search Input */}
-      <div className={`relative flex items-center transition-all duration-300 ${expanded ? 'w-56' : 'w-10'}`}>
+      <div className={`relative flex items-center transition-all duration-300 ${expanded ? 'w-40 sm:w-56' : 'w-10'}`}>
         {expanded ? (
           <div className="relative w-full">
             <input

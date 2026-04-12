@@ -106,7 +106,8 @@ export function SearchResults({
     setShowMobileFilters(false);
   };
   
-  const hasActiveFilters = selectedGenreId || category;
+  const activeFilterCount = (selectedGenreId ? 1 : 0) + (category ? 1 : 0);
+  const hasActiveFilters = activeFilterCount > 0;
   
   if (!query.trim() && results.length === 0 && !loading) {
     return (
@@ -157,92 +158,92 @@ export function SearchResults({
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
-          Filters
-          {hasActiveFilters && (
-            <span className="w-2 h-2 bg-[var(--color-accent)] rounded-full"></span>
-          )}
+          {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
         </button>
         
         {/* Mobile Filter Panel */}
         {showMobileFilters && (
-          <div className="mt-3 p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
-            {/* Default View - First */}
-            {onDefaultViewChange && (
-              <div className="mb-4">
-                <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">View</h4>
-                <div className="flex items-center gap-1 bg-[var(--color-bg-deep)] rounded-lg p-1 border border-[var(--color-border)]">
-                  {DEFAULT_VIEWS.map((view) => (
-                    <button
-                      key={view.value}
-                      onClick={() => onDefaultViewChange(view.value)}
-                      className={`flex-1 text-xs px-2.5 py-1.5 rounded-md font-medium transition-all duration-200 ${
-                        defaultView === view.value
-                          ? 'bg-[var(--color-accent)] text-white'
-                          : 'text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)]'
-                      }`}
-                    >
-                      {view.label}
-                    </button>
-                  ))}
+          <>
+            <div className="fixed inset-0 bg-black/30 z-40" onClick={() => setShowMobileFilters(false)} />
+            <div className="relative z-50 mt-3 p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] max-h-[70vh] overflow-y-auto">
+              {/* Default View - First */}
+              {onDefaultViewChange && (
+                <div className="mb-4 border-b border-[var(--color-border)] pb-3">
+                  <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">View</h4>
+                  <div className="flex items-center gap-1 bg-[var(--color-bg-deep)] rounded-lg p-1 border border-[var(--color-border)]">
+                    {DEFAULT_VIEWS.map((view) => (
+                      <button
+                        key={view.value}
+                        onClick={() => onDefaultViewChange(view.value)}
+                        className={`flex-1 text-xs px-2.5 py-1.5 rounded-md font-medium transition-all duration-200 ${
+                          defaultView === view.value
+                            ? 'bg-[var(--color-accent)] text-white'
+                            : 'text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)]'
+                        }`}
+                      >
+                        {view.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-            
-            {/* Category/Type - Second */}
-            {onCategoryChange && (
+              )}
+
+              {/* Category/Type - Second */}
+              {onCategoryChange && (
+                <div className="mb-4 border-b border-[var(--color-border)] pb-3">
+                  <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">Type</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {CATEGORIES.map((cat) => (
+                      <button
+                        key={cat.value}
+                        onClick={() => onCategoryChange(cat.value)}
+                        className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all duration-200 ${
+                          category === cat.value
+                            ? 'bg-[var(--color-accent)] text-white'
+                            : 'bg-[var(--color-bg-deep)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)]'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Genres - Third */}
               <div className="mb-4">
-                <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">Type</h4>
+                <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">Genres</h4>
                 <div className="flex flex-wrap gap-1.5">
-                  {CATEGORIES.map((cat) => (
+                  {genres.map((genre) => (
                     <button
-                      key={cat.value}
-                      onClick={() => onCategoryChange(cat.value)}
-                      className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all duration-200 ${
-                        category === cat.value
+                      key={genre.mal_id}
+                      onClick={() => handleGenreClick(genre.mal_id)}
+                      className={`text-xs px-2 py-1 rounded-lg font-medium transition-all duration-200 ${
+                        selectedGenreId === genre.mal_id
                           ? 'bg-[var(--color-accent)] text-white'
                           : 'bg-[var(--color-bg-deep)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)]'
                       }`}
                     >
-                      {cat.label}
+                      {genre.name}
                     </button>
                   ))}
                 </div>
               </div>
-            )}
-            
-            {/* Genres - Third */}
-            <div className="mb-4">
-              <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">Genres</h4>
-              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
-                {genres.map((genre) => (
-                  <button
-                    key={genre.mal_id}
-                    onClick={() => handleGenreClick(genre.mal_id)}
-                    className={`text-xs px-2 py-1 rounded-lg font-medium transition-all duration-200 ${
-                      selectedGenreId === genre.mal_id
-                        ? 'bg-[var(--color-accent)] text-white'
-                        : 'bg-[var(--color-bg-deep)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)]'
-                    }`}
-                  >
-                    {genre.name}
-                  </button>
-                ))}
-              </div>
+
+              {/* Clear Filters */}
+              {hasActiveFilters && (
+                <button
+                  onClick={clearAllFilters}
+                  className="w-full py-2 text-xs text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] border border-[var(--color-border)] rounded-lg"
+                >
+                  Clear Filters
+                </button>
+              )}
             </div>
-            
-            {/* Clear Filters */}
-            {hasActiveFilters && (
-              <button
-                onClick={clearAllFilters}
-                className="w-full py-2 text-xs text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] border border-[var(--color-border)] rounded-lg"
-              >
-                Clear Filters
-              </button>
-            )}
-          </div>
+          </>
         )}
       </div>
-      
+
       {/* Main Layout: Results + Right Panel */}
       <div className="flex gap-4 -mx-2">
         {/* Results Grid - Maximize left space, cards flush to left */}
@@ -254,11 +255,12 @@ export function SearchResults({
               const currentStatusOption = STATUS_OPTIONS.find(opt => opt.value === userStatus);
               
               return (
-                <AnimeCard 
+                <AnimeCard
                   key={anime.mal_id}
-                  anime={anime} 
+                  anime={anime}
                   onSelect={onAnimeSelect}
                   titleLanguage={titleLanguage}
+                  onGenreClick={onGenreChange ? (genreId) => { onGenreChange(genreId); } : undefined}
                   action={
                     onStatusChange && (
                       <Dropdown

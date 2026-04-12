@@ -6,9 +6,10 @@ interface AnimeCardProps {
   onSelect?: (anime: AnimeFromApi) => void;
   action?: ReactNode;
   titleLanguage?: 'english' | 'japanese' | 'kanji';
+  onGenreClick?: (genreId: number) => void;
 }
 
-export function AnimeCard({ anime, onSelect, action, titleLanguage = 'english' }: AnimeCardProps) {
+export function AnimeCard({ anime, onSelect, action, titleLanguage = 'english', onGenreClick }: AnimeCardProps) {
   const imageUrl = anime.images?.jpg?.large_image_url;
   
   // titleLanguage: 'english' = title_english → title (English), 'japanese' = title → title_english (romanized), 'kanji' = title_japanese
@@ -32,10 +33,10 @@ export function AnimeCard({ anime, onSelect, action, titleLanguage = 'english' }
           <img 
             src={imageUrl} 
             alt={title}
-            className="w-full h-100 object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-56 sm:h-72 md:h-100 object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-100 bg-[var(--color-bg-elevated)] flex items-center justify-center">
+          <div className="w-full h-56 sm:h-72 md:h-100 bg-[var(--color-bg-elevated)] flex items-center justify-center">
             <span className="text-[var(--color-foreground-muted)]">No Image</span>
           </div>
         )}
@@ -52,6 +53,19 @@ export function AnimeCard({ anime, onSelect, action, titleLanguage = 'english' }
           {episodes && <span className="px-2 py-0.5">{episodes} eps</span>}
           {score && <span className="px-2 py-0.5 text-[#fbbf24]">★ {score.toFixed(1)}</span>}
         </div>
+        {onGenreClick && anime.genres && anime.genres.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {anime.genres.slice(0, 2).map((genre) => (
+              <button
+                key={genre.mal_id}
+                onClick={(e) => { e.stopPropagation(); onGenreClick(genre.mal_id); }}
+                className="text-xs px-1.5 py-0.5 rounded bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-accent)] hover:text-white transition-colors"
+              >
+                {genre.name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
