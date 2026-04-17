@@ -18,6 +18,8 @@ export interface AnimeFromApi {
   status: string | null;
   year: number | null;
   genres?: { mal_id: number; name: string }[];
+  studios?: { mal_id: number; name: string }[];
+  airing?: boolean;
 }
 
 export interface AnimeInDb {

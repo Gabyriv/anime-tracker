@@ -94,11 +94,15 @@ export function SearchHeader({ query, setQuery, loading, titleLanguage, onLangua
         ) : (
           <button
             onClick={handleToggle}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)] transition-all duration-200"
+            className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)] transition-all duration-200 group"
+            title="Search (press /)"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
+            <span className="hidden sm:flex absolute -bottom-1.5 -right-1.5 items-center justify-center text-[9px] font-bold bg-[var(--color-bg-deep)] border border-[var(--color-border)] text-[var(--color-foreground-muted)] rounded px-0.5 leading-none py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              /
+            </span>
           </button>
         )}
       </div>

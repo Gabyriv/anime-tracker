@@ -221,14 +221,12 @@ export function useSearch(): UseSearchResult {
       return;
     }
 
-    const timeoutId = setTimeout(() => {
-      if (!query.trim()) {
-        prevBrowsePageRef.current = 1;
-        setBrowsePage(1);
-        loadTopAnime(1);
-      }
-    }, 300);
-    return () => clearTimeout(timeoutId);
+    if (!query.trim()) {
+      setLoading(true);
+      prevBrowsePageRef.current = 1;
+      setBrowsePage(1);
+      loadTopAnime(1);
+    }
   }, [category, selectedGenreId, defaultView]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {

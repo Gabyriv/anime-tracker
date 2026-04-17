@@ -20,7 +20,7 @@ const Dialog = React.forwardRef<
       />
       <div
         ref={ref}
-        className="relative z-50 bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-2xl p-4 pt-10 sm:p-6 sm:pt-12 max-w-2xl w-full max-h-[85vh] sm:max-h-[80vh] overflow-y-auto shadow-2xl animate-scaleIn"
+        className="relative z-50 bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-2xl p-4 pt-10 sm:p-6 sm:pt-12 max-w-3xl w-full max-h-[85vh] sm:max-h-[80vh] overflow-y-auto shadow-2xl animate-scaleIn"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         {...props}
       >

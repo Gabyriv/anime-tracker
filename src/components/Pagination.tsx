@@ -60,7 +60,11 @@ export function Pagination({ pagination, onPageChange, loading }: PaginationProp
   };
   
   return (
-    <div className="flex items-center justify-center gap-1 py-6">
+    <div className="flex flex-col items-center gap-2 py-6">
+      <span className="text-xs text-[var(--color-foreground-muted)]">
+        Page {current_page} of {last_visible_page}
+      </span>
+      <div className="flex items-center gap-1">
       <button
         onClick={handlePrev}
         disabled={!has_prev_page || loading}
@@ -103,6 +107,7 @@ export function Pagination({ pagination, onPageChange, loading }: PaginationProp
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>
+      </div>
     </div>
   );
 }

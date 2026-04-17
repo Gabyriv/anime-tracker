@@ -19,6 +19,7 @@ interface UserListProps {
   removeFromList: (entryId: number) => Promise<void>;
   updateEpisodeProgress: (entryId: number, episodes: number) => Promise<void>;
   refresh: () => void;
+  onGoHome?: () => void;
 }
 
 export function UserList({
@@ -29,6 +30,7 @@ export function UserList({
   removeFromList,
   updateEpisodeProgress,
   refresh,
+  onGoHome,
 }: UserListProps) {
   const [currentFilter, setCurrentFilter] = useState<AnimeStatus | 'all'>('all');
   
@@ -105,9 +107,23 @@ export function UserList({
   
   if (list.length === 0) {
     return (
-      <div className="p-12 text-center">
-        <div className="text-[var(--color-foreground-muted)] mb-4 text-lg">Your list is empty</div>
-        <div className="text-[var(--color-foreground-muted)]/60 text-sm">Search for anime to add!</div>
+      <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
+        <svg className="w-20 h-20 mb-6 text-[var(--color-accent)]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M9 9h6M9 13h4" />
+        </svg>
+        <h2 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">Your list is empty</h2>
+        <p className="text-[var(--color-foreground-muted)] text-sm mb-6 max-w-xs">
+          Start building your anime collection. Browse popular titles and add them to your list.
+        </p>
+        {onGoHome && (
+          <button
+            onClick={onGoHome}
+            className="px-6 py-2.5 rounded-xl bg-[var(--color-accent)] text-white font-medium text-sm hover:opacity-90 transition-opacity shadow-lg shadow-[var(--color-accent-glow)]"
+          >
+            Browse Anime
+          </button>
+        )}
       </div>
     );
   }

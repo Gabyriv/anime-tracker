@@ -126,9 +126,14 @@ async function fetchJikan(url: string, externalSignal?: AbortSignal): Promise<Ji
 }
 
 export async function getTopAnime(page = 1, limit = 20, type?: string, genre?: string, signal?: AbortSignal) {
-  let url = `${BASE_URL}/top/anime?page=${page}&limit=${limit}&sfw`;
+  let url: string;
+  if (genre) {
+    // /top/anime ignores the genres parameter; route to /anime ordered by score
+    url = `${BASE_URL}/anime?genres=${genre}&order_by=score&sort=desc&page=${page}&limit=${limit}&sfw`;
+  } else {
+    url = `${BASE_URL}/top/anime?page=${page}&limit=${limit}&sfw`;
+  }
   if (type && isValidType(type)) url += `&type=${type}`;
-  if (genre) url += `&genres=${genre}`;
   return fetchJikan(url, signal);
 }
 
@@ -149,11 +154,27 @@ export async function getLatestAnime(page = 1, limit = 20, type?: string, genre?
   return fetchJikan(url, signal);
 }
 
+function getCurrentSeasonBounds(): { start: string; end: string } {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const [sm, em] = m < 3 ? [0, 2] : m < 6 ? [3, 5] : m < 9 ? [6, 8] : [9, 11];
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const endDay = new Date(y, em + 1, 0).getDate();
+  return { start: `${y}-${pad(sm + 1)}-01`, end: `${y}-${pad(em + 1)}-${pad(endDay)}` };
+}
+
 // Get seasonal anime (current season)
 export async function getSeasonalAnime(page = 1, limit = 20, type?: string, genre?: string, signal?: AbortSignal) {
-  let url = `${BASE_URL}/seasons/now?page=${page}&limit=${limit}&sfw`;
+  let url: string;
+  if (genre) {
+    // /seasons/now ignores the genres parameter; route to /anime bounded by current season
+    const { start, end } = getCurrentSeasonBounds();
+    url = `${BASE_URL}/anime?genres=${genre}&start_date=${start}&end_date=${end}&order_by=popularity&sort=asc&page=${page}&limit=${limit}&sfw`;
+  } else {
+    url = `${BASE_URL}/seasons/now?page=${page}&limit=${limit}&sfw`;
+  }
   if (type && isValidType(type)) url += `&type=${type}`;
-  if (genre) url += `&genres=${genre}`;
   return fetchJikan(url, signal);
 }
 

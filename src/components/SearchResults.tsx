@@ -75,7 +75,8 @@ export function SearchResults({
   onDefaultViewChange
 }: SearchResultsProps) {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  
+  const [genreSearch, setGenreSearch] = useState('');
+
   // Close mobile filters when selecting a filter (single-select behavior)
   const handleGenreClick = (genreId: number) => {
     if (onGenreChange) {
@@ -87,28 +88,28 @@ export function SearchResults({
       }
     }
   };
-  
+
   const handleCategoryClick = (catValue: string) => {
     onCategoryChange?.(catValue);
     // Auto-close panel when selecting a category
     setShowMobileFilters(false);
   };
-  
+
   const handleViewClick = (viewValue: DefaultView) => {
     onDefaultViewChange?.(viewValue);
     // Auto-close panel when selecting a view
     setShowMobileFilters(false);
   };
-  
+
   const clearAllFilters = () => {
     onGenreChange?.(null);
     onCategoryChange?.('');
     setShowMobileFilters(false);
   };
-  
+
   const activeFilterCount = (selectedGenreId ? 1 : 0) + (category ? 1 : 0);
   const hasActiveFilters = activeFilterCount > 0;
-  
+
   if (!query.trim() && results.length === 0 && !loading) {
     return (
       <div className="p-8 text-center">
@@ -121,11 +122,11 @@ export function SearchResults({
       </div>
     );
   }
-  
+
   if (loading) {
     return <SearchResultsSkeleton />;
   }
-  
+
   if (error) {
     return (
       <div className="p-8 text-center">
@@ -138,7 +139,7 @@ export function SearchResults({
       </div>
     );
   }
-  
+
   if (results.length === 0) {
     return (
       <div className="p-8 text-center text-gray-400">
@@ -146,7 +147,7 @@ export function SearchResults({
       </div>
     );
   }
-  
+
   return (
     <>
       {/* Mobile Filter Button */}
@@ -160,12 +161,22 @@ export function SearchResults({
           </svg>
           {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
         </button>
-        
-        {/* Mobile Filter Panel */}
-        {showMobileFilters && (
-          <>
-            <div className="fixed inset-0 bg-black/30 z-40" onClick={() => setShowMobileFilters(false)} />
-            <div className="relative z-50 mt-3 p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] max-h-[70vh] overflow-y-auto">
+
+        {/* Mobile Filter Bottom Sheet */}
+        <>
+          {showMobileFilters && (
+            <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setShowMobileFilters(false)} />
+          )}
+          <div
+            className={`fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-bg-elevated)] rounded-t-2xl border-t border-[var(--color-border)] max-h-[75vh] flex flex-col transition-transform duration-300 ease-out ${
+              showMobileFilters ? 'translate-y-0' : 'translate-y-full'
+            }`}
+          >
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+              <div className="w-10 h-1 bg-white/20 rounded-full" />
+            </div>
+            <div className="overflow-y-auto px-4 pb-6">
               {/* Default View - First */}
               {onDefaultViewChange && (
                 <div className="mb-4 border-b border-[var(--color-border)] pb-3">
@@ -213,8 +224,15 @@ export function SearchResults({
               {/* Genres - Third */}
               <div className="mb-4">
                 <h4 className="text-xs font-medium text-[var(--color-foreground-muted)] mb-2 uppercase tracking-wide">Genres</h4>
+                <input
+                  type="text"
+                  placeholder="Search genres..."
+                  value={genreSearch}
+                  onChange={e => setGenreSearch(e.target.value)}
+                  className="w-full mb-2 px-3 py-2 text-sm rounded-lg bg-[var(--color-bg-deep)] border border-[var(--color-border)] text-[var(--color-foreground)] placeholder-[var(--color-foreground-muted)] focus:outline-none focus:border-[var(--color-accent)]/50"
+                />
                 <div className="flex flex-wrap gap-1.5">
-                  {genres.map((genre) => (
+                  {genres.filter(g => g.name.toLowerCase().includes(genreSearch.toLowerCase())).map((genre) => (
                     <button
                       key={genre.mal_id}
                       onClick={() => handleGenreClick(genre.mal_id)}
@@ -240,9 +258,49 @@ export function SearchResults({
                 </button>
               )}
             </div>
-          </>
-        )}
+          </div>
+        </>
       </div>
+
+      {/* Active Filter Pill Bar */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          {selectedGenreId && genres.find(g => g.mal_id === selectedGenreId) && (
+            <span className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-[var(--color-accent)]/20 border border-[var(--color-accent)]/40 text-sm text-[var(--color-accent)]">
+              {genres.find(g => g.mal_id === selectedGenreId)?.name}
+              <button
+                onClick={() => onGenreChange?.(null)}
+                className="hover:text-white transition-colors rounded-full p-0.5"
+                aria-label="Remove genre filter"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </span>
+          )}
+          {category && (
+            <span className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-[var(--color-accent)]/20 border border-[var(--color-accent)]/40 text-sm text-[var(--color-accent)]">
+              {CATEGORIES.find(c => c.value === category)?.label}
+              <button
+                onClick={() => onCategoryChange?.('')}
+                className="hover:text-white transition-colors rounded-full p-0.5"
+                aria-label="Remove type filter"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </span>
+          )}
+          <button
+            onClick={clearAllFilters}
+            className="text-xs text-[var(--color-foreground-muted)] hover:text-[var(--color-foreground)] transition-colors px-1"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
 
       {/* Main Layout: Results + Right Panel */}
       <div className="flex gap-4 -mx-2">
@@ -253,22 +311,22 @@ export function SearchResults({
               const inList = isInList?.(anime.mal_id);
               const userStatus = getUserStatus?.(anime.mal_id);
               const currentStatusOption = STATUS_OPTIONS.find(opt => opt.value === userStatus);
-              
+
               return (
                 <AnimeCard
                   key={anime.mal_id}
                   anime={anime}
                   onSelect={onAnimeSelect}
                   titleLanguage={titleLanguage}
-                  onGenreClick={onGenreChange ? (genreId) => { onGenreChange(genreId); } : undefined}
+                  userStatus={userStatus ?? undefined}
                   action={
                     onStatusChange && (
                       <Dropdown
                         trigger={
                           <button
                             className={`text-xs p-1.5 rounded-lg transition-all duration-200 ${
-                              inList 
-                                ? `${currentStatusOption?.color || 'bg-[var(--color-status-watching)]'} text-white` 
+                              inList
+                                ? `${currentStatusOption?.color || 'bg-[var(--color-status-watching)]'} text-white`
                                 : 'bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)]'
                             }`}
                           >
@@ -293,16 +351,16 @@ export function SearchResults({
               );
             })}
           </div>
-          
-          <Pagination 
-            pagination={pagination} 
-            onPageChange={onPageChange} 
-            loading={loading} 
+
+          <Pagination
+            pagination={pagination}
+            onPageChange={onPageChange}
+            loading={loading}
           />
         </div>
-        
+
         {/* Right Panel - Only on lg+ screens */}
-        <div className="hidden lg:block w-[180px] flex-shrink-0">
+        <div className="hidden lg:block w-[220px] flex-shrink-0">
           <div className="sticky top-4 space-y-2">
             {/* View Selector - Most prominent */}
             {onDefaultViewChange && (
@@ -325,7 +383,7 @@ export function SearchResults({
                 </div>
               </div>
             )}
-            
+
             {/* Type Filter */}
             {onCategoryChange && (
               <div className="p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
@@ -347,12 +405,19 @@ export function SearchResults({
                 </div>
               </div>
             )}
-            
+
             {/* Genres Section */}
             <div className="p-3 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)]">
               <h3 className="text-xs font-semibold mb-2 text-[var(--color-foreground-muted)] uppercase tracking-wider">Genres</h3>
-              <div className="flex flex-wrap gap-1.5 max-h-[280px] overflow-y-auto pr-1">
-                {genres.map((genre) => (
+              <input
+                type="text"
+                placeholder="Search genres..."
+                value={genreSearch}
+                onChange={e => setGenreSearch(e.target.value)}
+                className="w-full mb-2 px-2.5 py-1.5 text-xs rounded-lg bg-[var(--color-bg-deep)] border border-[var(--color-border)] text-[var(--color-foreground)] placeholder-[var(--color-foreground-muted)] focus:outline-none focus:border-[var(--color-accent)]/50"
+              />
+              <div className="flex flex-wrap gap-1.5 max-h-[260px] overflow-y-auto pr-1">
+                {genres.filter(g => g.name.toLowerCase().includes(genreSearch.toLowerCase())).map((genre) => (
                   <button
                     key={genre.mal_id}
                     onClick={() => handleGenreClick(genre.mal_id)}
@@ -367,7 +432,7 @@ export function SearchResults({
                 ))}
               </div>
             </div>
-            
+
             {/* Clear Filters */}
             {hasActiveFilters && (
               <button

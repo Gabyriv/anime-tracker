@@ -230,6 +230,7 @@ function App() {
             removeFromList={removeFromList}
             updateEpisodeProgress={updateEpisodeProgress}
             refresh={refreshList}
+            onGoHome={() => setViewMode('search')}
           />
         )}
       </main>
@@ -240,7 +241,7 @@ function App() {
             <>
               {/* Image section */}
               {selectedAnime.images?.jpg?.large_image_url && (
-                <div className="lg:w-1/3 flex-shrink-0">
+                <div className="lg:w-2/5 flex-shrink-0">
                   <img 
                     src={selectedAnime.images.jpg.large_image_url}
                     alt={selectedAnime.title}
@@ -258,6 +259,11 @@ function App() {
                     {selectedAnime.episodes && <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs">{selectedAnime.episodes} episodes</span>}
                     {selectedAnime.status && <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs capitalize">{selectedAnime.status?.replace('_', ' ')}</span>}
                     {selectedAnime.score && <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs text-amber-400">★ {selectedAnime.score}</span>}
+                    {selectedAnime.studios && selectedAnime.studios.length > 0 && (
+                      <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs">
+                        {selectedAnime.studios.map((s: { name: string }) => s.name).join(', ')}
+                      </span>
+                    )}
                   </DialogDescription>
                 </DialogHeader>
                 
@@ -300,9 +306,12 @@ function App() {
                     {selectedAnime.synopsis.length > 300 && (
                       <button
                         onClick={() => setSynopsisExpanded(!synopsisExpanded)}
-                        className="text-[var(--color-accent)] text-sm mt-2 hover:underline"
+                        className="flex items-center gap-1 text-[var(--color-accent)] text-sm mt-2 hover:opacity-80 transition-opacity"
                       >
-                        {synopsisExpanded ? <span className="font-bold">−</span> : <span className="font-bold">+</span>} {synopsisExpanded ? 'Show less' : 'Show more'}
+                        {synopsisExpanded ? 'Show less' : 'Show more'}
+                        <svg className={`w-4 h-4 transition-transform duration-200 ${synopsisExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
                       </button>
                     )}
                   </div>
@@ -310,16 +319,19 @@ function App() {
                 
                 {/* Genre tags */}
                 {selectedAnime.genres && selectedAnime.genres.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {selectedAnime.genres.map((genre) => (
-                      <button
-                        key={genre.mal_id}
-                        onClick={() => { setGenre(genre.mal_id); setSelectedAnime(null); setViewMode('search'); }}
-                        className="text-xs px-2.5 py-1 rounded-lg bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-accent)] hover:text-white transition-colors"
-                      >
-                        {genre.name}
-                      </button>
-                    ))}
+                  <div className="mt-4">
+                    <p className="text-xs text-[var(--color-foreground-muted)] mb-1.5 uppercase tracking-wide">Filter by genre</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedAnime.genres.map((genre) => (
+                        <button
+                          key={genre.mal_id}
+                          onClick={() => { setSelectedAnime(null); setGenre(genre.mal_id); setSynopsisExpanded(false); }}
+                          className="text-xs px-2.5 py-1 rounded-lg bg-[var(--color-surface)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-accent)] hover:text-white transition-colors"
+                        >
+                          {genre.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
