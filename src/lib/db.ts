@@ -36,9 +36,12 @@ export async function initDb(): Promise<Database> {
       score REAL,
       status TEXT,
       year INTEGER,
+      aired_episodes INTEGER DEFAULT NULL,
       added_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  try { db.run('ALTER TABLE anime_list ADD COLUMN aired_episodes INTEGER DEFAULT NULL'); } catch {}
   
   db.run(`
     CREATE TABLE IF NOT EXISTS user_list (
@@ -83,6 +86,7 @@ export async function getUserList(): Promise<any[]> {
       al.episodes,
       al.score,
       al.status as anime_status,
+      al.aired_episodes,
       al.year,
       ul.status,
       ul.episodes_watched,
@@ -201,4 +205,12 @@ export function getAnimeByMalId(malId: number): any | null {
     obj[col] = row[i];
   });
   return obj;
+}
+
+export async function updateAiredEpisodes(malId: number, count: number): Promise<void> {
+  const database = await getDb();
+  database.run(`
+    UPDATE anime_list SET aired_episodes = ? WHERE mal_id = ?
+  `, [count, malId]);
+  saveDb();
 }

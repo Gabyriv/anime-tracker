@@ -8,6 +8,8 @@ interface UserListCardProps {
     image_url: string | null;
     year: number | null;
     episodes: number | null;
+    anime_status: string | null;
+    aired_episodes: number | null;
   };
   onStatusChange: (entryId: number, status: AnimeStatus) => void;
   onRemove: (entryId: number) => void;
@@ -33,6 +35,8 @@ export function UserListCard({
   const year = entry.year;
   const totalEpisodes = entry.episodes;
   const episodesWatched = entry.episodes_watched || 0;
+  const isAiring = entry.anime_status === 'Currently Airing';
+  const airedEpisodes = entry.aired_episodes;
   
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -55,13 +59,17 @@ export function UserListCard({
   };
   
   const episodeDisplay = totalEpisodes 
-    ? `${episodesWatched} / ${totalEpisodes} eps`
+    ? isAiring && airedEpisodes !== null
+      ? `${airedEpisodes}/${totalEpisodes} aired · ${episodesWatched}/${totalEpisodes} watched`
+      : `${episodesWatched} / ${totalEpisodes} eps`
     : `Ep ${episodesWatched}`;
   
+  const maxEpisode = isAiring && airedEpisodes !== null ? airedEpisodes : totalEpisodes;
+
   const handleEpisodeIncrement = () => {
-    onEpisodeChange(entry.id, episodesWatched + 1);
+    onEpisodeChange(entry.id, Math.min(episodesWatched + 1, maxEpisode ?? episodesWatched + 1));
   };
-  
+
   const handleEpisodeDecrement = () => {
     if (episodesWatched > 0) {
       onEpisodeChange(entry.id, episodesWatched - 1);
@@ -100,7 +108,7 @@ export function UserListCard({
               <input
                 type="number"
                 min="0"
-                max={totalEpisodes || undefined}
+                max={maxEpisode || undefined}
                 value={episodesWatched}
                 onChange={(e) => {
                   const val = parseInt(e.target.value);
@@ -113,7 +121,7 @@ export function UserListCard({
               <button
                 onClick={handleEpisodeIncrement}
                 className="w-6 h-6 flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-foreground-muted)] rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-foreground)] transition-colors text-sm"
-                disabled={totalEpisodes !== null && episodesWatched >= totalEpisodes}
+                disabled={maxEpisode !== null && episodesWatched >= maxEpisode}
               >
                 +
               </button>

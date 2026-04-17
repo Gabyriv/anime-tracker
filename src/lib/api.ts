@@ -178,7 +178,47 @@ export async function getSeasonalAnime(page = 1, limit = 20, type?: string, genr
   return fetchJikan(url, signal);
 }
 
-// Cache the in-flight promise so concurrent callers share one request
+export async function fetchAiredEpisodes(malId: number): Promise<number | null> {
+  try {
+    const cooldownWait = rateLimitCooldownUntil - Date.now();
+    if (cooldownWait > 0) {
+      await new Promise(resolve => setTimeout(resolve, cooldownWait));
+    }
+    await respectRateLimit();
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const response = await fetch(`${BASE_URL}/anime/${malId}/episodes?page=1`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (response.status === 429) {
+      rateLimitCooldownUntil = Date.now() + 2000;
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      await respectRateLimit();
+      const retry = await fetch(`${BASE_URL}/anime/${malId}/episodes?page=1`);
+      if (!retry.ok) return null;
+      const retryData = await retry.json();
+      if (!retryData.data || !Array.isArray(retryData.data)) return null;
+      const lastVisiblePage = retryData.pagination?.last_visible_page ?? 1;
+      if (lastVisiblePage <= 1) return retryData.data.length;
+      return (lastVisiblePage - 1) * 100 + (retryData.pagination?.items?.count ?? retryData.data.length);
+    }
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    if (!data.data || !Array.isArray(data.data)) return null;
+    const lastVisiblePage = data.pagination?.last_visible_page ?? 1;
+    if (lastVisiblePage <= 1) return data.data.length;
+    return (lastVisiblePage - 1) * 100 + (data.pagination?.items?.count ?? data.data.length);
+  } catch {
+    return null;
+  }
+}
+
 let genresCachePromise: Promise<Genre[]> | null = null;
 
 // Fallback genres list in case API fails

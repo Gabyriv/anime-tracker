@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { initDb } from './lib/db';
+import { initDb, updateAiredEpisodes } from './lib/db';
+import { fetchAiredEpisodes } from './lib/api';
 import { useSearch } from './hooks/useSearch';
 import { useAnimeList } from './hooks/useAnimeList';
 import { useTitleLanguageToggle } from './hooks/useTitleLanguageToggle';
@@ -22,6 +23,7 @@ function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('search');
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
+  const [airedEpisodes, setAiredEpisodes] = useState<number | null>(null);
   const toastFnRef = useRef<((msg: string, type?: string, status?: string) => void) | null>(null);
   
   const { query, setQuery, results, loading, error: searchError, page, setPage, pagination, category, setCategory, defaultView, setDefaultView, genres, selectedGenreId, setGenre } = useSearch();
@@ -59,6 +61,22 @@ function App() {
       .then(() => setDbReady(true))
       .catch((err) => setError(err.message));
   }, []);
+
+  useEffect(() => {
+    if (!selectedAnime || selectedAnime.status !== 'Currently Airing') {
+      setAiredEpisodes(null);
+      return;
+    }
+    let cancelled = false;
+    setAiredEpisodes(null);
+    fetchAiredEpisodes(selectedAnime.mal_id).then(count => {
+      if (!cancelled && count !== null) {
+        setAiredEpisodes(count);
+        updateAiredEpisodes(selectedAnime.mal_id, count).then(() => refreshList());
+      }
+    });
+    return () => { cancelled = true; };
+  }, [selectedAnime?.mal_id, selectedAnime?.status]);
 
   const isInList = (malId: number) => {
     return list.some(item => item.mal_id === malId);
@@ -256,7 +274,13 @@ function App() {
                 <DialogTitle className="text-2xl">{getModalTitle(selectedAnime)}</DialogTitle>
                   <DialogDescription className="flex flex-wrap gap-3 mt-2">
                     {selectedAnime.year && <span className="bg-[var(--color-surface)] ml-0 mr-1 px-3 py-1 rounded text-xs">Year: {selectedAnime.year}</span>}
-                    {selectedAnime.episodes && <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs">{selectedAnime.episodes} episodes</span>}
+                    {selectedAnime.episodes && (
+                      <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs">
+                        {selectedAnime.status === 'Currently Airing' && airedEpisodes !== null
+                          ? `${airedEpisodes}/${selectedAnime.episodes} episodes`
+                          : `${selectedAnime.episodes} episodes`}
+                      </span>
+                    )}
                     {selectedAnime.status && <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs capitalize">{selectedAnime.status?.replace('_', ' ')}</span>}
                     {selectedAnime.score && <span className="bg-[var(--color-surface)] mr-1 px-3 py-1 rounded text-xs text-amber-400">★ {selectedAnime.score}</span>}
                     {selectedAnime.studios && selectedAnime.studios.length > 0 && (
